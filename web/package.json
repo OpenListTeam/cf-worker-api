@@ -1,0 +1,21 @@
+{
+  "name": "shaky-series",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "format": "biome check --write",
+    "lint": "biome lint"
+  },
+  "dependencies": {
+    "astro": "^5.9.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.10",
+    "sass": "^1.89.2",
+    "tailwindcss": "^4.1.10"
+  }
+}

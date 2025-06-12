@@ -1,12 +1,12 @@
 import { type HonoEnv, createDriverHonoApp } from "@/init";
-import cookie from "hono/cookie";
+import * as cookie from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 
 const app = createDriverHonoApp();
 
 const driver_map: Record<string, string[]> = {
   // [login, token]
-  onedrive_go: [
+  onedrive_global: [
     "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
     "https://login.microsoftonline.com/common/oauth2/v2.0/token",
   ],
@@ -24,11 +24,11 @@ const driver_map: Record<string, string[]> = {
   ],
 };
 
-// login request
+// handle form
 const oneLogin = createMiddleware<HonoEnv>(async (c) => {
   const client_uid = <string>c.req.query("client_uid");
   const client_key = <string>c.req.query("client_key");
-  const driver_txt = <string>c.req.query("apps_type");
+  const driver_txt = <string>c.req.query("app_type");
   const scopes_all = "offline_access Files.ReadWrite.All";
   const client_url: string = driver_map[driver_txt][0];
   // parameters for request
@@ -36,7 +36,7 @@ const oneLogin = createMiddleware<HonoEnv>(async (c) => {
     client_id: client_uid,
     scope: scopes_all,
     response_type: "code",
-    redirect_uri: `https://${c.env.MAIN_URL}/onedrive/callback`,
+    redirect_uri: `${c.env.MAIN_URL}/onedrive/callback`,
   };
   const urlWithParams = new URL(client_url);
   Object.keys(params_all).forEach((key) => {
@@ -67,7 +67,7 @@ const oneToken = createMiddleware<HonoEnv>(async (c) => {
     params_all = {
       client_id: client_uid,
       client_secret: client_key,
-      redirect_uri: `https://${c.env.MAIN_URL}/onedrive/callback`,
+      redirect_uri: `${c.env.MAIN_URL}/onedrive/callback`,
       code: login_data,
       grant_type: "authorization_code",
     };
@@ -140,7 +140,7 @@ const oneToken = createMiddleware<HonoEnv>(async (c) => {
   }
 });
 
-app.get("/requests", oneLogin);
+app.get("/handle", oneLogin);
 
 app.get("/callback", oneToken);
 

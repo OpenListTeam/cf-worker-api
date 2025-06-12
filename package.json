@@ -2,16 +2,16 @@
   "name": "cf-worker-api",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
+    "deploy": "wrangler deploy --minify --env production",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "format": "biome check --write",
     "lint": "biome lint"
   },
   "dependencies": {
-    "@cloudflare/workers-types": "^4.20250610.0",
     "hono": "^4.7.11"
   },
   "devDependencies": {
+    "@types/node": "^24.0.1",
     "wrangler": "^4.4.0"
   },
   "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"

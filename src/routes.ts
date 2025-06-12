@@ -6,8 +6,8 @@ const lazy = (importFunc: () => Promise<any>) => {
 };
 
 const routes: Record<string, ReturnType<typeof lazy>> = {
-  "/aliyun": lazy(() => import("@drivers/aliyunopen")),
-  "/onedrive": lazy(() => import("@drivers/onedrive")),
+  "aliyun": lazy(() => import("@drivers/aliyunopen")),
+  "onedrive": lazy(() => import("@drivers/onedrive")),
 };
 
 export default routes;

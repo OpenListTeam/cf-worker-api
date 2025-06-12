@@ -6,6 +6,9 @@
     "editor.codeActionsOnSave": {
         "source.organizeImports.biome": "explicit"
     },
+    "files.associations": {
+        "*.css": "tailwindcss",
+    },
     "[toml]": {
         "editor.defaultFormatter": "tamasfe.even-better-toml"
     },
@@ -14,5 +17,5 @@
     },
     "[typescriptreact]": {
         "editor.defaultFormatter": "biomejs.biome"
-    },
+    }
 }

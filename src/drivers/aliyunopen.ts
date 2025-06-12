@@ -103,7 +103,7 @@ const aliyunToken = createMiddleware<HonoEnv>(async (c) => {
   }
 });
 
-app.get("/requests", aliyunLogin);
+app.get("/handle", aliyunLogin);
 app.get("/callback", aliyunToken);
 
 export default app;
