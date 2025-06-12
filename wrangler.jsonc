@@ -3,13 +3,11 @@
   "name": "cf-worker-api",
   "main": "src/index.ts",
   "compatibility_date": "2025-05-25",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_flags": ["nodejs_compat"],
   "vars": {
     "MAIN_URLS": "api.oplist.org"
   },
   "site": {
     "bucket": "./public"
-  },
+  }
 }
