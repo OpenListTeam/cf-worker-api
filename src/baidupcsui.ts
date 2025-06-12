@@ -129,6 +129,8 @@ export async function baiduToken(c: Context, env: EnvConfig) {
         description: error.error_description || '未知错误'
       }, 403);
     }
+    local.deleteCookie(c, 'BAIDU_CLIENT_ID');
+    local.deleteCookie(c, 'BAIDU_CLIENT_SECRET');
 
     const tokenData = data as BaiduTokenResponse;
     const baiduTokenParam = encodeURIComponent(JSON.stringify({
