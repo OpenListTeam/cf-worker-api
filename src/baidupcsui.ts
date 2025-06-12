@@ -1,18 +1,15 @@
 import { Context } from "hono";
 
-// 百度API端点定义
 const baidu_endpoints = {
   authorization: 'https://openapi.baidu.com/oauth/2.0/authorize',
   token: 'https://openapi.baidu.com/oauth/2.0/token',
 };
 
-// 环境变量接口
 interface EnvConfig {
   clientId: string;
   clientSecret: string;
 }
 
-// 百度令牌请求参数接口
 interface BaiduTokenRequest {
   client_id: string;
   client_secret: string;
@@ -22,13 +19,11 @@ interface BaiduTokenRequest {
   refresh_token?: string;
 }
 
-// 百度错误响应接口
 interface BaiduErrorResponse {
   error: string;
   error_description: string;
 }
 
-// 百度令牌响应接口
 interface BaiduTokenResponse {
   access_token: string;
   expires_in: number;
@@ -38,10 +33,8 @@ interface BaiduTokenResponse {
   session_secret?: string;
 }
 
-// 生成百度授权URL
 export async function baiduAuth(c: Context, env: EnvConfig) {
   try {
-    // 检查环境变量是否配置
     if (!env.clientId || !env.clientSecret) {
       return c.json({ 
         error: '百度网盘配置未完成',
@@ -49,7 +42,6 @@ export async function baiduAuth(c: Context, env: EnvConfig) {
       }, 500);
     }
 
-    // 获取重定向URI参数或使用默认值
     const redirectUri = c.req.query('redirect_uri') || 
                         'https://api.oplist.org/baidupcs/callback';
 
@@ -70,10 +62,8 @@ export async function baiduAuth(c: Context, env: EnvConfig) {
   }
 }
 
-// 获取百度令牌
 export async function baiduToken(c: Context, env: EnvConfig) {
   try {
-    // 检查环境变量是否配置
     if (!env.clientId || !env.clientSecret) {
       return c.json({ 
         error: '百度网盘配置未完成',
@@ -91,7 +81,6 @@ export async function baiduToken(c: Context, env: EnvConfig) {
                     'https://api.oplist.org/baidupcs/callback'
     };
 
-    // 参数验证
     if (req.grant_type === 'authorization_code' && !req.code) {
       return c.json({ error: '需要授权码' }, 400);
     }
@@ -100,7 +89,6 @@ export async function baiduToken(c: Context, env: EnvConfig) {
       return c.json({ error: '需要刷新令牌' }, 400);
     }
 
-    // 构建请求参数
     const body = new URLSearchParams();
     body.append('grant_type', req.grant_type);
     body.append('client_id', req.client_id);
@@ -113,7 +101,6 @@ export async function baiduToken(c: Context, env: EnvConfig) {
       body.append('refresh_token', req.refresh_token!);
     }
 
-    // 调用百度API
     const response = await fetch(baidu_endpoints.token, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
