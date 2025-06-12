@@ -136,7 +136,7 @@ export async function baiduToken(c: Context, env: EnvConfig) {
       refresh_token: tokenData.refresh_token
     }));
 
-    return c.redirect(`http://127.0.0.1:8787/?baidu_token=${baiduTokenParam}`, 302);
+    return c.redirect(`https://api.oplist.org/?baidu_token=${baiduTokenParam}`, 302);
 
 
   } catch (error) {
