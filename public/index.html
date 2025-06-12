@@ -13,6 +13,7 @@
             --bg-color-dark: #1e1e2f;
             --text-color-dark: #f0f0f0;
             --accent-color: #00d1b2;
+            --baidu-color: #2932e1;
         }
 
         [data-theme="light"] body {
@@ -91,6 +92,69 @@
         [data-theme="dark"] p {
             color: #ffffff;
         }
+        
+        .baidu-btn {
+            background-color: var(--baidu-color);
+            border-color: var(--baidu-color);
+            color: white;
+        }
+        
+        .baidu-btn:hover {
+            background-color: #1c23b8;
+            border-color: #1c23b8;
+            color: white;
+        }
+        
+        .baidu-qrcode {
+            max-width: 250px;
+            margin: 0 auto;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .login-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(0,0,0,0.05);
+        }
+        
+        [data-theme="dark"] .login-step {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background-color: var(--baidu-color);
+            color: white;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .driver-info {
+            background: rgba(41, 50, 225, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid var(--baidu-color);
+        }
+        
+        [data-theme="dark"] .driver-info {
+            background: rgba(41, 50, 225, 0.15);
+        }
+        
+        .driver-info h5 {
+            color: var(--baidu-color);
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -101,22 +165,25 @@
     <h2 class="text-center mb-4">🔐 OpenList Token 获取工具</h2>
     <div class="mb-3">
         <label for="site-select" class="form-label">网盘名称</label>
-        <select id="site-select" class="form-select">
+        <select id="site-select" class="form-select" onchange="onDriverChange()">
             <option value="onedrive_go" selected>OneDrive 官方站点</option>
             <option value="onedrive_cn">OneDrive 世纪互联</option>
             <option value="onedrive_us">OneDrive 美国版本</option>
             <option value="onedrive_de">OneDrive 德国版本</option>
             <option value="alicloud_qr">阿里网盘 扫码登录</option>
+            <option value="baidupcs">百度网盘</option>
         </select>
 
-        <div class="mb-3">
-            <label for="client-id" class="form-label">客户端 ID</label>
-            <input type="text" id="client-id" class="form-control">
-        </div>
+        <div class="mb-3" id="credentials-container">
+            <div class="mb-3" id="client-id-container">
+                <label for="client-id" class="form-label">客户端 ID</label>
+                <input type="text" id="client-id" class="form-control">
+            </div>
 
-        <div class="mb-3">
-            <label for="app-secret" class="form-label">应用机密</label>
-            <input type="text" id="app-secret" class="form-control">
+            <div class="mb-3" id="app-secret-container">
+                <label for="app-secret" class="form-label">应用机密</label>
+                <input type="text" id="app-secret" class="form-control">
+            </div>
         </div>
 
         <div class="mb-3">
@@ -125,9 +192,16 @@
                    readonly
                    onclick="autoCopy(this)">
         </div>
+        
+        <div id="baidu-info" class="driver-info" style="display: none;">
+            <h5>百度网盘接入说明</h5>
+            <p class="mb-1">• 百度网盘使用服务器端配置的应用信息</p>
+            <p class="mb-1">• 无需填写客户端ID和应用机密</p>
+            <p class="mb-0">• 回调地址已设置为: <code>https://api.oplist.org/baidupcs/callback</code></p>
+        </div>
 
         <div class="d-grid gap-2 mb-3">
-            <button class="btn btn-primary" onclick="getLogin()">获取 Token</button>
+            <button id="login-btn" class="btn btn-primary" onclick="getLogin()">获取 Token</button>
         </div>
 
         <div class="mb-3">
@@ -154,79 +228,183 @@
 <script>
     let intervalId;
 
-    // 获取登录秘钥 #######################################################
-    async function getLogin() {
-        let apps_uuid = document.getElementById("client-id").value;
-        let apps_keys = document.getElementById("app-secret").value;
-        let apps_type = document.getElementById("site-select").value;
-        if (apps_uuid === "" || apps_keys === "") {
-            Swal.fire({
-                position: 'top',
-                icon: 'info',
-                title: '获取失败',
-                text: '请先填写客户端ID和应用机密',
-                showConfirmButton: true,
-            });
-            return;
+    // 网盘类型变化处理
+    function onDriverChange() {
+        const driverType = document.getElementById("site-select").value;
+        const callbackInput = document.getElementById("callback-url");
+        const baiduInfo = document.getElementById("baidu-info");
+        const loginBtn = document.getElementById("login-btn");
+        const clientIdContainer = document.getElementById("client-id-container");
+        const appSecretContainer = document.getElementById("app-secret-container");
+        const credentialsContainer = document.getElementById("credentials-container");
+        
+        if (driverType === "baidupcs") {
+            callbackInput.value = "https://api.oplist.org/baidupcs/callback";
+            baiduInfo.style.display = "block";
+            clientIdContainer.style.display = "none";
+            appSecretContainer.style.display = "none";
+            loginBtn.textContent = "百度网盘登录";
+            loginBtn.classList.remove("btn-primary");
+            loginBtn.classList.add("baidu-btn");
+            credentialsContainer.style.marginBottom = "0";
+        } else {
+            callbackInput.value = "https://api.oplist.org/onedrive/callback";
+            baiduInfo.style.display = "none";
+            clientIdContainer.style.display = "block";
+            appSecretContainer.style.display = "block";
+            loginBtn.textContent = "获取 Token";
+            loginBtn.classList.remove("baidu-btn");
+            loginBtn.classList.add("btn-primary");
+            credentialsContainer.style.marginBottom = "";
         }
-        let apps_subs = apps_type.split("_")[0]
-        let post_urls = "/" + apps_subs + "/requests?client_uid=" + apps_uuid
-            + "&client_key=" + apps_keys + "&apps_type=" + apps_type;
+    }
+
+    // 获取登录秘钥
+    async function getLogin() {
+        const driverType = document.getElementById("site-select").value;
+        const apps_uuid = document.getElementById("client-id").value;
+        const apps_keys = document.getElementById("app-secret").value;
+        const apps_subs = driverType.split("_")[0];
+        
+        // 百度网盘不需要客户端ID和密钥
+        if (driverType !== "baidupcs") {
+            if (apps_uuid === "" || apps_keys === "") {
+                Swal.fire({
+                    position: 'top',
+                    icon: 'info',
+                    title: '获取失败',
+                    text: '请先填写客户端ID和应用机密',
+                    showConfirmButton: true,
+                });
+                return;
+            }
+        }
+        
+        let post_urls = "/" + apps_subs + "/requests";
+        
+        // 对于非百度网盘，添加客户端ID和密钥参数
+        if (driverType !== "baidupcs") {
+            post_urls += "?client_uid=" + encodeURIComponent(apps_uuid)
+                      + "&client_key=" + encodeURIComponent(apps_keys)
+                      + "&apps_type=" + driverType;
+        } else {
+            // 百度网盘只需要类型参数
+            post_urls += "?apps_type=" + driverType;
+        }
+            
         try {
             const response = await fetch(post_urls, {
-                method: 'GET', headers: {'Content-Type': 'application/json'}
+                method: 'GET', 
+                headers: {'Content-Type': 'application/json'}
             });
-            // 解析响应内容 ===============================================
+            
+            // 解析响应内容
             const response_data = await response.json();
+            
             if (response.status === 200) {
+                // OneDrive 处理
                 if (apps_subs === "onedrive") {
                     window.location.href = response_data.text;
                 }
-                if (apps_type === "alicloud_qr") {
+                
+                // 阿里网盘扫码登录
+                if (driverType === "alicloud_qr") {
                     let sid = response_data.sid;
                     await Swal.fire({
-                        position: 'top',
+                        position: 'center',
                         icon: 'info',
-                        title: '扫码登录',
-                        html: `<div>请扫码登录，完成后点确定</div>` +
-                            `<img src="${response_data.text}" alt="">`,
-                        showConfirmButton: true
+                        title: '阿里网盘扫码登录',
+                        html: `<div class="text-center mb-3">请使用阿里云盘APP扫码登录</div>` +
+                            `<div class="text-center"><img src="${response_data.text}" alt="二维码" style="max-width: 250px;"></div>`,
+                        showConfirmButton: true,
+                        confirmButtonText: '已完成扫码',
+                        showCancelButton: true,
+                        cancelButtonText: '取消'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            post_urls = "/alicloud/callback" +
+                                "?client_id=" + apps_uuid +
+                                "&client_secret=" + apps_keys +
+                                "&grant_type=" + "authorization_code" +
+                                "&code=" + sid
+                                
+                            let auth_post = await fetch(post_urls, {method: 'GET'});
+                            let auth_data = await auth_post.json();
+                            
+                            if (auth_post.status === 200) {
+                                window.location.href = `/?access_token=${auth_data.access_token}`
+                                    + `&refresh_token=${auth_data.refresh_token}`
+                                    + `&client_uid=${apps_uuid}`
+                                    + `&client_key=${apps_keys}`;
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: "获取令牌失败",
+                                    text: auth_data.text || '未知错误',
+                                    showConfirmButton: true
+                                });
+                            }
+                        }
                     });
-                    post_urls = "/alicloud/callback" +
-                        "?client_id=" + apps_uuid +
-                        "&client_secret=" + apps_keys +
-                        "&grant_type=" + "authorization_code" +
-                        "&code=" + sid
-                    let auth_post = await fetch(post_urls, {method: 'GET'});
-                    let auth_data = await auth_post.json();
-                    if (auth_post.status === 200) {
-                        window.location.href = `/?access_token=${auth_data.access_token}`
-                            + `&refresh_token=${auth_data.refresh_token}`
-                            + `&client_uid=${apps_uuid}`
-                            + `&client_key=${apps_keys}`;
-                    }
                 }
-            } else Swal.fire({
-                icon: 'error',
-                title: "获取秘钥失败: " + response_data.text,
-                showConfirmButton: true,
-                timer: 1000
-            });
+                
+                // 百度网盘处理
+                if (driverType === "baidupcs") {
+                    // 显示授权步骤
+                    await Swal.fire({
+                        title: '百度网盘授权',
+                        html: `
+                            <div class="text-start">
+                                <div class="login-step">
+                                    <span class="step-number">1</span>
+                                    <span>点击下方按钮打开百度授权页面</span>
+                                </div>
+                                <div class="login-step">
+                                    <span class="step-number">2</span>
+                                    <span>登录您的百度账号并授权</span>
+                                </div>
+                                <div class="login-step">
+                                    <span class="step-number">3</span>
+                                    <span>授权完成后返回此页面</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <i class="text-muted">使用服务器配置的应用信息</i>
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: '打开授权页面',
+                        cancelButtonText: '取消',
+                        confirmButtonColor: '#2932e1',
+                        icon: 'info'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // 跳转到百度授权URL
+                            window.location.href = response_data.authorization_url;
+                        }
+                    });
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: "获取秘钥失败",
+                    text: response_data.error || response_data.description || '未知错误',
+                    showConfirmButton: true,
+                });
+            }
         } catch (error) {
             Swal.fire({
                 icon: 'error',
-                title: '获取秘钥失败: ' + error,
+                title: '获取秘钥失败',
+                text: error.message || '网络请求异常',
                 showConfirmButton: true,
-                timer: 1000
             });
         }
     }
 
-    // 自动复制内容 #####################################################
+    // 自动复制内容
     function autoCopy(on_element) {
-        // if (on_element.innerText === "") return;
         navigator.clipboard.writeText(on_element.value).then(() => {
-            // 显示复制成功的提示
             Swal.fire({
                 position: 'top',
                 icon: 'success',
@@ -235,7 +413,6 @@
                 timer: 700
             });
         }).catch(err => {
-            // 复制失败时的处理
             console.error('无法复制文本：', err);
             Swal.fire({
                 position: 'top',
@@ -255,6 +432,7 @@
         const access_token = urlParams.get("access_token");
         const refresh_token = urlParams.get("refresh_token");
         const message_err = urlParams.get("message_err");
+        
         if (message_err && client_uid) {
             Swal.fire({
                 position: 'top',
@@ -264,27 +442,66 @@
                 showConfirmButton: true,
             });
         }
-        document.getElementById("client-id").value = client_uid;
-        document.getElementById("app-secret").value = client_key;
-        document.getElementById("access-token").value = access_token;
-        document.getElementById("refresh-token").value = refresh_token;
+        
+        if (client_uid) document.getElementById("client-id").value = client_uid;
+        if (client_key) document.getElementById("app-secret").value = client_key;
+        if (access_token) document.getElementById("access-token").value = access_token;
+        if (refresh_token) document.getElementById("refresh-token").value = refresh_token;
+        
+        // 检查URL中是否有百度授权成功的参数
+        const baiduToken = urlParams.get("baidu_token");
+        if (baiduToken) {
+            try {
+                const tokenData = JSON.parse(decodeURIComponent(baiduToken));
+                document.getElementById("access-token").value = tokenData.access_token;
+                document.getElementById("refresh-token").value = tokenData.refresh_token;
+
+                const siteSelect = document.getElementById("site-select");
+                siteSelect.value = "baidupcs";
+                siteSelect.dispatchEvent(new Event("change")); // 如果 onDriverChange 有需要触发
+                
+                Swal.fire({
+                    position: 'top',
+                    icon: 'success',
+                    title: '百度网盘授权成功',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } catch (e) {
+                console.error("解析百度令牌失败", e);
+            }
+        }
+        
+        // 初始化时调用一次网盘类型变化处理
+        onDriverChange();
     }
 
-    getToken();
-
-    //手动切换主题模式
+    // 手动切换主题模式
     function toggleTheme() {
         const html = document.documentElement;
         const current = html.getAttribute("data-theme");
         html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+        
+        // 保存主题偏好
+        localStorage.setItem('theme', current === "dark" ? "light" : "dark");
     }
 
-    // 自动切换暗黑模式
-    (function () {
-        const hour = new Date().getHours();
-        if (hour < 6 || hour >= 18) document.documentElement.setAttribute("data-theme", "dark");
+    // 页面加载时执行
+    document.addEventListener('DOMContentLoaded', function() {
+        // 检查保存的主题偏好
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        } else {
+            // 自动切换暗黑模式
+            const hour = new Date().getHours();
+            if (hour < 6 || hour >= 18) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        }
+        
         getToken();
-    })();
+    });
 </script>
 </body>
 </html>
