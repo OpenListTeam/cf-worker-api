@@ -195,8 +195,8 @@
         
         <div id="baidu-info" class="driver-info" style="display: none;">
             <h5>百度网盘接入说明</h5>
-            <p class="mb-1">• 百度网盘使用服务器端配置的应用信息</p>
-            <p class="mb-1">• 无需填写客户端ID和应用机密</p>
+            <p class="mb-1">• 百度网盘支持自定义API密钥（可选填写）</p>
+            <p class="mb-1">• 如未填写，将使用服务器配置的默认API</p>
             <p class="mb-0">• 回调地址已设置为: <code>https://api.oplist.org/baidupcs/callback</code></p>
         </div>
 
@@ -241,8 +241,8 @@
         if (driverType === "baidupcs") {
             callbackInput.value = "https://api.oplist.org/baidupcs/callback";
             baiduInfo.style.display = "block";
-            clientIdContainer.style.display = "none";
-            appSecretContainer.style.display = "none";
+            clientIdContainer.style.display = "block";
+            appSecretContainer.style.display = "block";
             loginBtn.textContent = "百度网盘登录";
             loginBtn.classList.remove("btn-primary");
             loginBtn.classList.add("baidu-btn");
@@ -282,15 +282,21 @@
         
         let post_urls = "/" + apps_subs + "/requests";
         
-        // 对于非百度网盘，添加客户端ID和密钥参数
-        if (driverType !== "baidupcs") {
-            post_urls += "?client_uid=" + encodeURIComponent(apps_uuid)
-                      + "&client_key=" + encodeURIComponent(apps_keys)
-                      + "&apps_type=" + driverType;
+        // 构建查询参数
+        const params = new URLSearchParams();
+        params.append("apps_type", driverType);
+        
+        // 对于百度网盘，如果有填写ID和密钥则传递
+        if (driverType === "baidupcs") {
+            if (apps_uuid) params.append("client_uid", apps_uuid);
+            if (apps_keys) params.append("client_key", apps_keys);
         } else {
-            // 百度网盘只需要类型参数
-            post_urls += "?apps_type=" + driverType;
+            // 非百度网盘必须传递ID和密钥
+            if (apps_uuid) params.append("client_uid", apps_uuid);
+            if (apps_keys) params.append("client_key", apps_keys);
         }
+        
+        post_urls += "?" + params.toString();
             
         try {
             const response = await fetch(post_urls, {
@@ -351,6 +357,8 @@
                 // 百度网盘处理
                 if (driverType === "baidupcs") {
                     // 显示授权步骤
+                    const infoText = apps_uuid ? "使用自定义API密钥" : "使用服务器配置的API密钥";
+                    // 显示授权步骤
                     await Swal.fire({
                         title: '百度网盘授权',
                         html: `
@@ -369,7 +377,7 @@
                                 </div>
                             </div>
                             <div class="mt-3 text-center">
-                                <i class="text-muted">使用服务器配置的应用信息</i>
+                                <i class="text-muted">${infoText}</i>
                             </div>
                         `,
                         showCancelButton: true,
@@ -453,6 +461,8 @@
         if (baiduToken) {
             try {
                 const tokenData = JSON.parse(decodeURIComponent(baiduToken));
+                document.getElementById("client-id").value = tokenData.client_uid;
+                document.getElementById("app-secret").value = tokenData.client_key;
                 document.getElementById("access-token").value = tokenData.access_token;
                 document.getElementById("refresh-token").value = tokenData.refresh_token;
 

@@ -1,3 +1,4 @@
+import * as local from "hono/cookie";
 import { Context } from "hono";
 
 const baidu_endpoints = {
@@ -35,7 +36,16 @@ interface BaiduTokenResponse {
 
 export async function baiduAuth(c: Context, env: EnvConfig) {
   try {
-    if (!env.clientId || !env.clientSecret) {
+    const clientId = c.req.query('client_uid') || env.clientId;
+    const clientSecret = c.req.query('client_key') || env.clientSecret;
+    if (
+      c.req.query('client_uid') && clientId !== env.clientId &&
+      c.req.query('client_key') && clientSecret !== env.clientSecret
+    ) {
+      await local.setCookie(c, 'BAIDU_CLIENT_ID', clientId);
+      await local.setCookie(c, 'BAIDU_CLIENT_SECRET', clientSecret);
+    }
+    if (!clientId || !clientSecret) {
       return c.json({ 
         error: '百度网盘配置未完成',
         message: '请联系管理员配置BAIDU_CLIENT_ID和BAIDU_CLIENT_SECRET环境变量'
@@ -47,7 +57,7 @@ export async function baiduAuth(c: Context, env: EnvConfig) {
 
     const params = new URLSearchParams({
       response_type: 'code',
-      client_id: env.clientId,
+      client_id: clientId,
       redirect_uri: redirectUri,
       scope: 'basic,netdisk',
       display: 'popup',
@@ -64,7 +74,10 @@ export async function baiduAuth(c: Context, env: EnvConfig) {
 
 export async function baiduToken(c: Context, env: EnvConfig) {
   try {
-    if (!env.clientId || !env.clientSecret) {
+    const clientId = (await local.getCookie(c, 'BAIDU_CLIENT_ID')) || c.req.query('client_uid') || env.clientId;
+    const clientSecret = (await local.getCookie(c, 'BAIDU_CLIENT_SECRET')) || c.req.query('client_key') || env.clientSecret;
+
+    if (!clientId || !clientSecret) {
       return c.json({ 
         error: '百度网盘配置未完成',
         message: '请联系管理员配置BAIDU_CLIENT_ID和BAIDU_CLIENT_SECRET环境变量'
@@ -72,8 +85,8 @@ export async function baiduToken(c: Context, env: EnvConfig) {
     }
 
     const req: BaiduTokenRequest = {
-      client_id: env.clientId,
-      client_secret: env.clientSecret,
+      client_id: clientId,
+      client_secret: clientSecret,
       grant_type: c.req.query('grant_type') as any || 'authorization_code',
       code: c.req.query('code') || undefined,
       refresh_token: c.req.query('refresh_token') || undefined,
@@ -119,6 +132,8 @@ export async function baiduToken(c: Context, env: EnvConfig) {
 
     const tokenData = data as BaiduTokenResponse;
     const baiduTokenParam = encodeURIComponent(JSON.stringify({
+      client_uid: clientId,
+      client_key: clientSecret,
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token
     }));
