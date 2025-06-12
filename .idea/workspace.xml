@@ -8,6 +8,7 @@
       <change afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/aliui.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/oneui.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/baidupcsui.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
