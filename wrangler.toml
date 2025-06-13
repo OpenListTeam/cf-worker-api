@@ -1,0 +1,19 @@
+name = "openlist-api"
+main = "src/index.ts"
+compatibility_date = "2025-05-25"
+compatibility_flags = [ "nodejs_compat" ]
+
+[dev]
+ip             = "127.0.0.1"
+port           = 8787
+local_protocol = "http"
+
+[site]
+bucket = "public"
+
+
+[vars]
+MAIN_URL = "http://localhost:4321/api"
+
+[env.production.vars]
+MAIN_URL = "https://api.oplist.org/api"

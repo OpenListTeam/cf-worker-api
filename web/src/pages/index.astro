@@ -1,0 +1,22 @@
+---
+import FormLayout, { type Props as FormLayoutProps } from "@/layouts/FormLayout.astro";
+import { MAIN_URL } from "@/wrangler";
+
+interface ModuleExport {
+  default: any;
+  NAME: string;
+}
+
+  const forms: Record<string, ModuleExport> = import.meta.glob("@/forms/*.tsx", { eager: true });
+
+  const all_drivers: Record<string, string> = {};
+   Object.entries(forms)
+    .filter(([_path]) => !_path.includes("/_"))
+    .forEach(([_path, module]) => {
+      const { NAME: subtitle } = module as ModuleExport;
+      const driver_id = /\/forms\/(.+?)\.tsx$/.exec(_path)?.[1]!;
+      all_drivers[driver_id] = subtitle;
+    });
+---
+
+<FormLayout all_drivers={all_drivers} driver_id={""} />

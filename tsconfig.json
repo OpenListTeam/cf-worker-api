@@ -5,13 +5,19 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "skipLibCheck": true,
-    "lib": [
-      "ESNext",
-    ],
-    "types": [
-      "@cloudflare/workers-types/2023-07-01"
-    ],
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+    "lib": ["ESNext"],
     "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx"
+    "jsxImportSource": "hono/jsx",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@drivers/*": ["src/drivers/*"]
+    }
   },
+  "include": ["worker-configuration.d.ts", "manifest.d.ts", "src/**/*.ts"]
 }

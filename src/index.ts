@@ -1,34 +1,19 @@
-import {Context, Hono} from 'hono'
-import {KVNamespace} from '@cloudflare/workers-types';
-import {serveStatic} from 'hono/cloudflare-workers' // @ts-ignore
-import manifest from '__STATIC_CONTENT_MANIFEST'
-import * as local from "hono/cookie";
-import * as oneui from './oneui';
-import * as aliui from './aliui';
+import manifest from "__STATIC_CONTENT_MANIFEST";
+import { Hono } from "hono";
+import { serveStatic } from "hono/cloudflare-workers"; // @ts-ignore
+import routes from "./routes";
 
-export type Bindings = {
-    MAIN_URLS: string
+// biome-ignore lint/correctness/noUndeclaredVariables: i don't know why biome cannot recognize this
+const app = new Hono<{ Bindings: CloudflareBindings }>();
+
+for (const path in routes) {
+  app.route(`api/${path}`, await routes[path]());
 }
-const app = new Hono<{ Bindings: Bindings }>()
-app.use("*", serveStatic({manifest: manifest, root: "./"}));
 
-// 登录申请 ##############################################################################
-app.get('/onedrive/requests', async (c) => {
-    return oneui.oneLogin(c);
-})
-// 令牌申请 ##############################################################################
-app.get('/onedrive/callback', async (c) => {
-    return oneui.oneToken(c);
-})
-
-// 登录申请 ##############################################################################
-app.get('/alicloud/requests', async (c: Context) => {
-    return aliui.alyLogin(c);
+app.all("/api/ping", (c) => {
+  return c.text("pong");
 });
 
-// 令牌申请 ##############################################################################
-app.get('/alicloud/callback', async (c: Context) => {
-    return aliui.alyToken(c);
-});
+app.use("*", serveStatic({ manifest: manifest, root: "./" }));
 
-export default app
+export default app;
