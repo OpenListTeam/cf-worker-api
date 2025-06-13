@@ -4,6 +4,8 @@
 /.pnp
 .pnp.js
 
+/public
+
 .wrangler/*
 
 .dev.vars

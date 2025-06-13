@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "build:prod": "astro build --mode production",
+    "build:prod": "astro build --mode production --outDir ../public",
     "preview": "astro preview",
     "astro": "astro",
     "format": "biome check --write",
