@@ -23,16 +23,16 @@ Wrangler backend development server:
 pnpm dev
 ```
 
-Add or modify routes in [src/drivers](./src/drivers).
+Add or modify routes in [src/drivers](./src/drivers) and [web/src/forms](./web/src/forms).
 
-Then modify [src/routes.ts](./src/routes.ts) and [web/collection.ts](./web/collection.ts).
+Then modify [src/routes.ts](./src/routes.ts).
 
 ## Production & Deployment
 
 Build the frontend:
 
 ```bash
-pnpm run build:prod
+pnpm run build
 ```
 
 Deploy the backend:

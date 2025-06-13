@@ -1,7 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "tailwind.config.mts", "*.ts", "src/**/*"],
-  "exclude": ["dist"],
+  "include": [".astro/types.d.ts", "tailwind.config.mts", "src/**/*"],
+  "exclude": ["dist", "**/_tmp/**/*"],
   "compilerOptions": {
     "jsx": "preserve",
     "jsxImportSource": "solid-js",

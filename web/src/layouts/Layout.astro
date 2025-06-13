@@ -1,0 +1,59 @@
+---
+import "@/theme/global.css";
+
+export interface Props {
+  title?: string;
+  subtitle?: string;
+}
+
+
+const title = Astro.props.title || "OpenList Token Generator";
+const title_array = [title]
+if (Astro.props.subtitle)   title_array.unshift(Astro.props.subtitle);
+
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title_array.join(" | ")}</title>
+  </head>
+  <body>
+    <div class="view">
+      <div class="box">
+        <slot />
+      </div>
+    </div>
+  </body>
+</html>
+
+<style lang="scss">
+  @use "../theme/theme.scss" as *;
+
+  body {
+    margin: 0;
+    font-family: -apple-system, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+      "微软雅黑", Arial, sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .view {
+    width: 100%;
+    min-height: 100vh;
+    margin-top: 3rem;
+    padding: 0 1rem;
+  }
+
+  .box {
+    background-color: var(--color-bg);
+    margin: 0 auto;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 768px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+  }
+</style>

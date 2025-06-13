@@ -1,4 +1,5 @@
-/tmp
+tmp/
+_tmp/
 /out-tsc
 
 /.pnp

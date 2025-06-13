@@ -1,0 +1,73 @@
+---
+import FormLayout, { type Props as FormLayoutProps } from "@/layouts/FormLayout.astro";
+import { MAIN_URL } from "@/wrangler";
+import fs from "node:fs";
+import path from "node:path";
+
+interface ModuleExport {
+  default: any;
+  NAME: string;
+}
+
+interface Props {
+  Component: any;
+  driver_id: string;
+  props: FormLayoutProps;
+  all_drivers: Record<string, string>;
+}
+
+export async function getStaticPaths() {
+  const CONTENT = `
+---
+import Form from "@/forms/{name}.tsx";
+---
+
+<Form {...Astro.props} client:idle />
+`.trim();
+
+  const forms: Record<string, ModuleExport> = import.meta.glob("@/forms/*.tsx", { eager: true });
+  const dir = path.resolve("src/tmp");
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  const all_drivers: Record<string, string> = {};
+  const namemap = new Map<string, string>();
+  const pools = Object.entries(forms)
+    .filter(([_path]) => !_path.includes("/_"))
+    .map(([_path, module]) => {
+      const { NAME: subtitle } = module as ModuleExport;
+      const driver_id = /\/forms\/(.+?)\.tsx$/.exec(_path)?.[1]!;
+
+      return new Promise(async resolve => {
+
+        fs.writeFileSync(path.resolve(dir, `${driver_id}.astro`), CONTENT.replace("{name}", driver_id), "utf-8");
+        namemap.set(driver_id, subtitle);
+        all_drivers[driver_id] = subtitle;
+        resolve(null);
+      });
+    });
+  await Promise.all(pools);
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const astroForms: Record<string, ModuleExport> = import.meta.glob("@/tmp/*.astro", { eager: true });
+  return Object.entries(astroForms)
+    .map(([path, module]) => {
+      const driver_id = path.match(/\/tmp\/(.+?)\.astro$/)?.[1]!;
+      const subtitle = namemap.get(driver_id);
+      if (!subtitle) return null;
+      const { default: Component } = module as ModuleExport;
+      return {
+        params: { driver_id },
+        props: { Component, driver_id, props: { subtitle, driver_id, all_drivers } }
+      };
+    })
+    .filter(Boolean);
+}
+
+const { Component, driver_id, props } = Astro.props as Props;
+---
+
+<FormLayout {...props}>
+  <Component driver_id={driver_id} endpoint={MAIN_URL} client:idle />
+</FormLayout>

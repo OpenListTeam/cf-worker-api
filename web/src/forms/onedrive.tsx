@@ -1,89 +1,50 @@
-import Cookie from "@/utils/cookie";
+import { type FormSchema, getFormData, loadFromCookieData, openURL } from "@/utils/form";
 import Button from "@/widgets/Button";
-import { For, Match, Switch, createSignal, onMount } from "solid-js";
-import type { CollectionItem } from "../../../collection";
+import { For, Match, Switch, onMount } from "solid-js";
+
+export const NAME = "OneDrive";
 
 const blacklist_form_fields = ["driver_id", "access_token", "refresh_token"];
 
-const openUrl = (url: string, target: "_blank" | "_self" = "_blank") => {
-  const a = document.createElement("a");
-  a.href = url;
-  a.target = target;
-  a.rel = "noopener noreferrer";
-  a.click();
-  a.remove();
-};
-
-export default function FormList(props: { collection: Record<string, CollectionItem>; endpoint?: string }) {
-  const [driver, setDriver] = createSignal<string>(Object.keys(props.collection)[0] || "");
-  const [accessToken, setAccessToken] = createSignal<string>("");
-  const [refreshToken, setRefreshToken] = createSignal<string>("");
-
-  const endpoint = props.endpoint || "/api";
+export default function (props: { driver_id: string; endpoint: string }) {
+  const schema: FormSchema = {
+    fields: [
+      {
+        key: "app_type",
+        key_text: "版本",
+        type: "select",
+        default: "global",
+        options: [
+          { value: "global", text: "官方" },
+          { value: "cn", text: "世纪互联" },
+          { value: "de", text: "德国版本" },
+          { value: "us", text: "美国版本" },
+        ],
+      },
+    ],
+    callback_uri: `${props.endpoint}/onedrive/callback`,
+  };
 
   function submit() {
-    const prepareUrl = `${endpoint}/${driver()}/prepare`;
-    const form = document.getElementById("form-list") as HTMLFormElement;
-    const formData = new FormData(form);
+    const prepareUrl = `${props.endpoint}/${props.driver_id}/prepare`;
+    const formData = getFormData(blacklist_form_fields);
     const params = new URLSearchParams();
     formData.forEach((value, key) => {
       if (!blacklist_form_fields.includes(key)) {
         params.append(key, value as string);
       }
     });
-    openUrl(`${prepareUrl}?${params.toString()}`, "_self");
+    openURL(`${prepareUrl}?${params.toString()}`, "_self");
   }
 
   onMount(() => {
-    // load params from url
-    const params = new URLSearchParams(window.location.search);
-    if (params.has("access_token")) setAccessToken(params.get("access_token") || "");
-    if (params.has("refresh_token")) setRefreshToken(params.get("refresh_token") || "");
-
     // load params from `resolve_data` cookie
-    const resolveData = Cookie.get("resolve_data");
-    if (resolveData) {
-      let data = {};
-      try {
-        data = JSON.parse(resolveData);
-      } catch {
-        data = {};
-        Cookie.delete("resolve_data");
-      }
-      for (const [key, value] of Object.entries(data)) {
-        if (key === "access_token") return setAccessToken(String(value));
-        if (key === "refresh_token") return setRefreshToken(String(value));
-        const input = document.querySelector(`#form-list [name="${key}"]`) as
-          | HTMLInputElement
-          | HTMLSelectElement
-          | null;
-        if (input) {
-          input.value = String(value);
-        }
-      }
-    }
+    loadFromCookieData();
   });
   return (
     <form id="form-list" target="form-list-iframe" class="w-full">
       <iframe class="hidden" name="form-list-iframe" title="nop" />
-      <div class="my-2 w-full">
-        <div class="mb-1 font-bold">Driver Name</div>
-        <div>
-          <select
-            name="driver_id"
-            class="w-full p-2 border border-gray-300 rounded"
-            title="Select a driver"
-            on:change={(e) => {
-              setDriver(e.currentTarget.value);
-            }}
-          >
-            {Object.entries(props.collection).map(([key, data]) => (
-              <option value={key}>{data.name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <For each={props.collection[driver()]?.extra_field || []}>
+      <For each={schema.fields || []}>
         {(field) => (
           <div class="my-2 w-full">
             <div class="mb-1 font-bold">{field.key_text}</div>
@@ -149,7 +110,7 @@ export default function FormList(props: { collection: Record<string, CollectionI
             class="w-full p-2 border border-gray-300 rounded"
             placeholder="Client ID"
             // required
-            value={props.collection[driver()]?.client_id || ""}
+            value={schema?.client_id || ""}
           />
         </div>
       </div>
@@ -162,7 +123,7 @@ export default function FormList(props: { collection: Record<string, CollectionI
             class="w-full p-2 border border-gray-300 rounded"
             placeholder="Client Secret"
             // required
-            value={props.collection[driver()]?.client_secret || ""}
+            value={schema?.client_secret || ""}
           />
         </div>
       </div>
@@ -175,7 +136,7 @@ export default function FormList(props: { collection: Record<string, CollectionI
             class="w-full p-2 border border-gray-300 rounded"
             placeholder="Callback URL"
             // required
-            value={props.collection[driver()]?.callback_uri || ""}
+            value={schema?.callback_uri || ""}
           />
         </div>
       </div>
@@ -194,9 +155,7 @@ export default function FormList(props: { collection: Record<string, CollectionI
             placeholder="Access Token"
             rows="4"
             readonly
-          >
-            {accessToken()}
-          </textarea>
+          />
         </div>
       </div>
       <div class="my-2 w-full">
@@ -208,9 +167,7 @@ export default function FormList(props: { collection: Record<string, CollectionI
             placeholder="Access Token"
             rows="4"
             readonly
-          >
-            {refreshToken()}
-          </textarea>
+          />
         </div>
       </div>
     </form>

@@ -4,8 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "build:prod": "astro build --mode production --outDir ../public",
+    "build": "astro build --mode production --outDir ../public",
     "preview": "astro preview",
     "astro": "astro",
     "format": "biome check --write",
@@ -17,6 +16,7 @@
   },
   "devDependencies": {
     "@astrojs/solid-js": "^5.1.0",
+    "@biomejs/biome": "1.9.4",
     "@tailwindcss/vite": "^4.1.10",
     "astro": "^5.9.2",
     "sass": "^1.89.2",

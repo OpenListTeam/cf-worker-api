@@ -1,64 +1,22 @@
 ---
-import "@/theme/global.css";
-import collection, {MAIN_URL} from "collection";
-import FormList from "./_blocks/FormList";
-import { MsgBoxFromUrl } from "./_blocks/MsgBox";
-import { ClearDataButton } from "./_blocks/ClearData";
+import FormLayout, { type Props as FormLayoutProps } from "@/layouts/FormLayout.astro";
+import { MAIN_URL } from "@/wrangler";
+
+interface ModuleExport {
+  default: any;
+  NAME: string;
+}
+
+  const forms: Record<string, ModuleExport> = import.meta.glob("@/forms/*.tsx", { eager: true });
+
+  const all_drivers: Record<string, string> = {};
+   Object.entries(forms)
+    .filter(([_path]) => !_path.includes("/_"))
+    .forEach(([_path, module]) => {
+      const { NAME: subtitle } = module as ModuleExport;
+      const driver_id = /\/forms\/(.+?)\.tsx$/.exec(_path)?.[1]!;
+      all_drivers[driver_id] = subtitle;
+    });
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>OpenList Token Generator</title>
-  </head>
-  <body>
-    <div class="view">
-      <div class="box">
-        <div class="text-3xl font-bold text-center w-full mb-4">
-          <span>OpenList Token Generator</span>
-        </div>
-        <div>
-          <FormList collection={collection} endpoint={MAIN_URL} client:idle />
-          <MsgBoxFromUrl client:only />
-        </div>
-        <div>
-          <div><ClearDataButton class="w-full" client:idle /></div>
-          <div class="mt-2">
-            <span>Your data stores only locally by Cookie, and will automatically be cleared when you close the browser.</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>
-</html>
-
-<style lang="scss">
-  @use "../theme/theme.scss" as *;
-
-  body {
-    margin: 0;
-    font-family: -apple-system, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-      "微软雅黑", Arial, sans-serif;
-    background-color: var(--color-bg);
-    color: var(--color-text);
-  }
-
-  .view {
-    width: 100%;
-    min-height: 100vh;
-    margin-top: 3rem;
-    padding: 0 1rem;
-  }
-
-  .box {
-    background-color: var(--color-bg);
-    margin: 0 auto;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 768px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
-  }
-</style>
+<FormLayout all_drivers={all_drivers} driver_id={""} />

@@ -1,7 +1,8 @@
+import cookieStore from "@/mw/cookie-store";
+import throwHttp from "@/mw/throw-http";
 import { Hono } from "hono";
 import * as cookie from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
-import cookieStore from "./mw/cookie-store";
 
 export interface HonoEnv {
   // biome-ignore lint/correctness/noUndeclaredVariables: idk why biome doesn't recognize this
@@ -44,8 +45,8 @@ export function createDriverHonoApp() {
     /*
      * We don't use URL Search to bypass data, because the data length may exceed the URL length limit.
      */
-    c.back_to_index = (search?: Record<string, string> | URLSearchParams | string) => {
-      const searchParams = new URLSearchParams(search);
+    c.navigate_to = (path = "/", resolve_data?: Record<string, string> | URLSearchParams | string) => {
+      const searchParams = new URLSearchParams(resolve_data);
       const map = new Map<string, string>();
       searchParams.forEach((value, key) => {
         map.set(key, value);
@@ -54,11 +55,12 @@ export function createDriverHonoApp() {
         httpOnly: false,
         path: "/",
       });
-      return c.redirect("/", 302);
+      return c.redirect(path, 302);
     };
     return next();
   });
 
+  app.use(throwHttp);
   app.use(cookieStore);
 
   app.onError((err, c) => {
@@ -82,6 +84,6 @@ export function createDriverHonoApp() {
 declare module "hono" {
   interface Context {
     show_message: (msg: string, type?: "success" | "warning" | "error" | "info") => Response;
-    back_to_index: (search?: Record<string, string> | URLSearchParams | string) => Response;
+    navigate_to: (path?: string, resolve_data?: Record<string, string> | URLSearchParams | string) => Response;
   }
 }

@@ -1,0 +1,58 @@
+---
+import "@/theme/global.css";
+import Layout from "@/layouts/Layout.astro";
+import { MsgBoxFromUrl } from "./_blocks/MsgBox";
+import { ClearDataButton } from "./_blocks/ClearData";
+
+export interface Props {
+  title?: string;
+  subtitle?: string;
+  all_drivers?: Record<string, string>;
+  driver_id?: string;
+}
+
+const title = Astro.props.title || "OpenList Token Generator";
+
+const { all_drivers, driver_id } = Astro.props;
+console.log(all_drivers)
+---
+
+<Layout title={title} subtitle={Astro.props.subtitle}>
+  <div class="text-3xl font-bold text-center w-full mb-4">
+    <span>{title}</span>
+  </div>
+  <div>
+    <div class="my-2 w-full">
+        <div class="mb-1 font-bold">Driver Name</div>
+      <select
+        class="w-full p-2 border border-gray-300 rounded"
+        name="driver_id"
+        id="driver_id"
+      >
+      {!driver_id && <option value="" selected>Choose a driver</option>}
+      {Object.entries(all_drivers || {}).map(([id, name]) => (
+        <option value={id} selected={id === driver_id}>{name}</option>
+      ))}
+      </select>
+    </div>
+    <script>
+      document.getElementsByName("driver_id")[0].addEventListener("change", (e) => {
+        const selectedDriverId = (e.target as HTMLSelectElement).value;
+        const url = new URL(window.location.href);
+        url.pathname = `/${selectedDriverId}/`;
+        window.location.replace(url.toString());
+      });
+    </script>
+  </div>
+  <slot />
+  <div>
+    <MsgBoxFromUrl client:only />
+  </div>
+  <div>
+    <div><ClearDataButton class="w-full" client:idle /></div>
+    <div class="mt-2">
+      <span>Your data stores only locally by Cookie, and will automatically be cleared when you close the browser.</span
+      >
+    </div>
+  </div>
+</Layout>
