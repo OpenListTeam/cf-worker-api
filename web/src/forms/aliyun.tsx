@@ -93,7 +93,7 @@ export default function (props: { driver_id: string; endpoint: string }) {
           <textarea
             name="refresh_token"
             class="w-full p-2 border border-gray-300 rounded"
-            placeholder="Access Token"
+            placeholder="Refresh Token"
             rows="4"
             readonly
           />
