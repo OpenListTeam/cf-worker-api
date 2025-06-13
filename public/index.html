@@ -112,6 +112,7 @@
             <option value="115cloud_go">115 网盘 验证登录</option>
             <option value="123cloud_go">123 网盘 直接登录</option>
             <option value="googleui_go">Google Drive Team</option>
+            <option value="yandex_go">Yandex Drive</option>
         </select>
     </div>
 
@@ -201,7 +202,7 @@
             const response_data = await response.json();
             if (response.status === 200) {
                 if (apps_subs === "onedrive" || apps_subs === "115cloud"
-                    || apps_subs === "baiduyun" || apps_subs === "googleui") {
+                    || apps_subs === "baiduyun" || apps_subs === "googleui" || apps_subs === "yandex") {
                     window.location.href = response_data.text;
                 }
                 if (apps_subs === "123cloud") {

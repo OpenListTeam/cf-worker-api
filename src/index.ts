@@ -9,6 +9,7 @@ import * as ui115 from './115ui';
 import * as ui123 from './123ui';
 import * as baidu from './baidu';
 import * as goapi from './goapi';
+import * as yandex from './yandex';
 
 export type Bindings = {
     MAIN_URLS: string, baiduyun_ext: string,
@@ -17,7 +18,9 @@ export type Bindings = {
     baiduyun_uid: string, baiduyun_key: string,
     cloud115_uid: string, cloud115_key: string,
     googleui_uid: string, googleui_key: string,
+    YANDEX_CLIENT_ID: string, YANDEX_CLIENT_SECRET: string,
 }
+
 const app = new Hono<{ Bindings: Bindings }>()
 app.use("*", serveStatic({manifest: manifest, root: "./"}));
 
@@ -80,5 +83,8 @@ app.get('/googleui/callback', async (c: Context) => {
     return goapi.oneToken(c);
 });
 
+app.get('/yandex/requests', async (c: Context) => {return yandex.yandexLogin(c)});
+
+app.get('/yandex/callback', async (c: Context) => {return yandex.yandexCallBack(c)});
 
 export default app
