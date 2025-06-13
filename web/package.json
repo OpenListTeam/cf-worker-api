@@ -5,17 +5,22 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:prod": "astro build --mode production",
     "preview": "astro preview",
     "astro": "astro",
     "format": "biome check --write",
     "lint": "biome lint"
   },
   "dependencies": {
-    "astro": "^5.9.2"
+    "clsx": "^2.1.1",
+    "toml": "^3.0.0"
   },
   "devDependencies": {
+    "@astrojs/solid-js": "^5.1.0",
     "@tailwindcss/vite": "^4.1.10",
+    "astro": "^5.9.2",
     "sass": "^1.89.2",
+    "solid-js": "^1.9.7",
     "tailwindcss": "^4.1.10"
   }
 }

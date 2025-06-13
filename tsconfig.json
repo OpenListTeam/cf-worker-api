@@ -6,6 +6,7 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
     "lib": ["ESNext"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
@@ -18,5 +19,5 @@
       "@drivers/*": ["src/drivers/*"]
     }
   },
-	"include": ["worker-configuration.d.ts", "manifest.d.ts", "src/**/*.ts"]
+  "include": ["worker-configuration.d.ts", "manifest.d.ts", "src/**/*.ts"]
 }

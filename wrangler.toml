@@ -12,7 +12,7 @@ bucket = "public"
 
 
 [vars]
-MAIN_URL = "http://localhost:3000/api"
+MAIN_URL = "http://localhost:4321/api"
 
 [env.production.vars]
 MAIN_URL = "https://api.oplist.org/api"

@@ -1,10 +1,11 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "tailwind.config.mts", "src/**/*"],
+  "include": [".astro/types.d.ts", "tailwind.config.mts", "*.ts", "src/**/*"],
   "exclude": ["dist"],
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "verbatimModuleSyntax": true,
     "lib": ["DOM", "ESNext"],
     "plugins": [
       {
@@ -13,7 +14,8 @@
     ],
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@widgets/*": ["src/widgets/*"]
     }
   }
 }

@@ -1,8 +1,22 @@
+import wranglerConfig from "../wrangler.toml";
+
+const main_url = {
+  dev: wranglerConfig.vars.MAIN_URL,
+  prod: wranglerConfig.env.production.vars.MAIN_URL,
+};
+
+const isProd = import.meta.env.PROD ?? process.env.NODE_ENV === "production";
+
+export const MAIN_URL = main_url[isProd ? "prod" : "dev"];
+
+console.info(`Using main URL: ${MAIN_URL}`);
+
 function withOrigin(path: string, origin?: string) {
-  const _origin = origin || `${window.location.origin}/api`;
+  const _origin = origin || MAIN_URL;
   return `${_origin}${path}`;
 }
-interface CollectionItem {
+
+export interface CollectionItem {
   name: string;
   extra_field?: {
     key: string;
@@ -14,13 +28,13 @@ interface CollectionItem {
     description?: string;
   }[];
   client_id?: string;
-  client_key?: string;
-  callback_url: string;
+  client_secret?: string;
+  callback_uri?: string;
 }
 
-// will requeset post `/:id/handle` with form data
+// will requeset post `/:id/prepare` with form data
 const collection: Record<string, CollectionItem> = {
-  "onedrive": {
+  onedrive: {
     name: "OneDrive",
     extra_field: [
       {
@@ -36,7 +50,11 @@ const collection: Record<string, CollectionItem> = {
         ],
       },
     ],
-    callback_url: withOrigin("/onedrive/callback"),
+    callback_uri: withOrigin("/onedrive/callback"),
+  },
+  aliyun: {
+    name: "阿里云盘",
+    callback_uri: withOrigin("/aliyun/callback"),
   },
 };
 

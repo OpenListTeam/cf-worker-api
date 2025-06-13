@@ -1,6 +1,7 @@
 {
   "name": "cf-worker-api",
   "scripts": {
+    "start": "bun run src/index.ts",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify --env production",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
@@ -11,6 +12,7 @@
     "hono": "^4.7.11"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/node": "^24.0.1",
     "wrangler": "^4.4.0"
   },

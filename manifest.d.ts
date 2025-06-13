@@ -1,3 +1,4 @@
 declare module "__STATIC_CONTENT_MANIFEST" {
-  export default string;
+  const str: string;
+  export default str;
 }

@@ -1,5 +1,9 @@
 ---
-
+import "@/theme/global.css";
+import collection, {MAIN_URL} from "collection";
+import FormList from "./_blocks/FormList";
+import { MsgBoxFromUrl } from "./_blocks/MsgBox";
+import { ClearDataButton } from "./_blocks/ClearData";
 ---
 
 <html lang="en">
@@ -7,13 +11,23 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>OpenList Token Getter</title>
+    <title>OpenList Token Generator</title>
   </head>
   <body>
     <div class="view">
       <div class="box">
-        <div class="p-4">
-          <span>OpenList Token Getter</span>
+        <div class="text-3xl font-bold text-center w-full mb-4">
+          <span>OpenList Token Generator</span>
+        </div>
+        <div>
+          <FormList collection={collection} endpoint={MAIN_URL} client:idle />
+          <MsgBoxFromUrl client:only />
+        </div>
+        <div>
+          <div><ClearDataButton class="w-full" client:idle /></div>
+          <div class="mt-2">
+            <span>Your data stores only locally by Cookie, and will automatically be cleared when you close the browser.</span>
+          </div>
         </div>
       </div>
     </div>
@@ -35,10 +49,10 @@
     width: 100%;
     min-height: 100vh;
     margin-top: 3rem;
+    padding: 0 1rem;
   }
 
   .box {
-    text-align: center;
     background-color: var(--color-bg);
     margin: 0 auto;
     padding: 2rem;

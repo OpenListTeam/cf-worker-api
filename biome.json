@@ -11,6 +11,8 @@
   },
   "files": {
     "ignore": [
+      ".*/**/*",
+      "worker-configuration.d.ts",
       "**/.DS_Store",
       "**/node_modules",
       "./build",
@@ -20,7 +22,8 @@
       "**/public",
       "**/pnpm-lock.yaml",
       "**/package-lock.json",
-      "**/yarn.lock"
+      "**/yarn.lock",
+      "**/*.astro"
     ]
   },
   "organizeImports": {

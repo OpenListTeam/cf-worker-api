@@ -1,23 +1,46 @@
 # OpenList API Token Generator
 
-```txt
-npm install
-npm run dev
+## Init
+
+```bash
+pnpm install
+pnpm --prefix=web install
 ```
 
-```txt
-npm run deploy
+## Development
+
+Change [wrangler.toml](./wrangler.toml) environment variables.
+
+Frontend development server:
+
+```bash
+cd web && pnpm dev
 ```
 
-[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
+Wrangler backend development server:
 
-```txt
-npm run cf-typegen
+```bash
+pnpm dev
 ```
 
-Pass the `CloudflareBindings` as generics when instantiation `Hono`:
+Add or modify routes in [src/drivers](./src/drivers).
 
-```ts
-// src/index.ts
-const app = new Hono<{ Bindings: CloudflareBindings }>()
+Then modify [src/routes.ts](./src/routes.ts) and [web/collection.ts](./web/collection.ts).
+
+## Production & Deployment
+
+Build the frontend:
+
+```bash
+pnpm run build:prod
 ```
+
+Deploy the backend:
+
+```bash
+pnpm run deploy
+```
+
+## License
+
+The code of this project is licensed under the [AGPL 3.0](LICENSE) license.
