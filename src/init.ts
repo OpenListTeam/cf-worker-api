@@ -1,6 +1,6 @@
 import cookieStore from "@/mw/cookie-store";
 import throwHttp from "@/mw/throw-http";
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import * as cookie from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 
@@ -10,6 +10,15 @@ export interface HonoEnv {
   Variables: {
     from_browser: boolean;
   };
+}
+
+function getDriverId(c: Context<HonoEnv>) {
+  const path = c.req.path;
+  const match = path.match(/^\/([^/]+)/);
+  if (match?.[1]) {
+    return match[1];
+  }
+  return null;
 }
 
 export function createDriverHonoApp() {
@@ -45,7 +54,7 @@ export function createDriverHonoApp() {
     /*
      * We don't use URL Search to bypass data, because the data length may exceed the URL length limit.
      */
-    c.resolve = (driver_id = "", resolve_data?: Record<string, string> | URLSearchParams | string) => {
+    c.resolve = (resolve_data?: Record<string, string> | URLSearchParams | string) => {
       const searchParams = new URLSearchParams(resolve_data);
       const map = new Map<string, string>();
       searchParams.forEach((value, key) => {
@@ -55,6 +64,7 @@ export function createDriverHonoApp() {
         httpOnly: false,
         path: "/",
       });
+      const driver_id = getDriverId(c);
       return c.redirect(`/${driver_id}`, 302);
     };
     return next();
@@ -70,7 +80,8 @@ export function createDriverHonoApp() {
         searchParams.set("msg", err.message);
         const firstCode = Math.ceil(err.status / 100);
         searchParams.set("msg_type", firstCode === 2 ? "success" : firstCode === 4 ? "warning" : "error");
-        return c.redirect(`/?${searchParams.toString()}`, 302);
+        const driverId = getDriverId(c);
+        return c.redirect(`/${driverId}?${searchParams.toString()}`, 302);
       }
       return c.text(err.message, err.status);
     }
@@ -84,6 +95,6 @@ export function createDriverHonoApp() {
 declare module "hono" {
   interface Context {
     show_message: (msg: string, type?: "success" | "warning" | "error" | "info") => Response;
-    resolve: (driver_id?: string, resolve_data?: Record<string, string> | URLSearchParams | string) => Response;
+    resolve: (resolve_data?: Record<string, string> | URLSearchParams | string) => Response;
   }
 }
