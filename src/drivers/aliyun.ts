@@ -77,7 +77,7 @@ const aliyunQrLogin = createMiddleware<HonoEnv>(async (c) => {
   }
   // biome-ignore lint/suspicious/noExplicitAny: response can be any type
   const data: Record<string, any> = await response.json();
-  console.log(data);
+
   return c.json(
     {
       text: data.qrCodeUrl,
@@ -137,7 +137,6 @@ const aliyunToken = createMiddleware<HonoEnv>(async (c) => {
   }
   // biome-ignore lint/suspicious/noExplicitAny: response can be any type
   const data: Record<string, any> = await response.json();
-  console.log(data);
   return c.json(data);
 });
 

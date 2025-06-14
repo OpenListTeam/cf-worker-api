@@ -32,7 +32,13 @@ Then modify [src/routes.ts](./src/routes.ts).
 Build the frontend:
 
 ```bash
-pnpm run build
+pnpm build
+```
+
+Preview the production site:
+
+```bash
+pnpm start
 ```
 
 Deploy the backend:

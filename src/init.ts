@@ -45,7 +45,7 @@ export function createDriverHonoApp() {
     /*
      * We don't use URL Search to bypass data, because the data length may exceed the URL length limit.
      */
-    c.navigate_to = (path = "/", resolve_data?: Record<string, string> | URLSearchParams | string) => {
+    c.resolve = (driver_id = "", resolve_data?: Record<string, string> | URLSearchParams | string) => {
       const searchParams = new URLSearchParams(resolve_data);
       const map = new Map<string, string>();
       searchParams.forEach((value, key) => {
@@ -55,7 +55,7 @@ export function createDriverHonoApp() {
         httpOnly: false,
         path: "/",
       });
-      return c.redirect(path, 302);
+      return c.redirect(`/${driver_id}`, 302);
     };
     return next();
   });
@@ -84,6 +84,6 @@ export function createDriverHonoApp() {
 declare module "hono" {
   interface Context {
     show_message: (msg: string, type?: "success" | "warning" | "error" | "info") => Response;
-    navigate_to: (path?: string, resolve_data?: Record<string, string> | URLSearchParams | string) => Response;
+    resolve: (driver_id?: string, resolve_data?: Record<string, string> | URLSearchParams | string) => Response;
   }
 }

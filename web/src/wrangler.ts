@@ -1,3 +1,6 @@
+/**
+ * ! Do not import this on the frontend
+ */
 import wranglerConfig from "../../wrangler.toml";
 
 const main_url = {

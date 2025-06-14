@@ -1,8 +1,8 @@
 {
   "name": "cf-worker-api",
   "scripts": {
-    "start": "bun run src/index.ts",
-    "dev": "wrangler dev",
+    "start": "wrangler dev --env production",
+    "dev": "wrangler dev --var DEV:true",
     "deploy": "wrangler deploy --minify --env production",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "format": "biome check --write",

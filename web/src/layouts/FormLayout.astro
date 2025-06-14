@@ -14,7 +14,6 @@ export interface Props {
 const title = Astro.props.title || "OpenList Token Generator";
 
 const { all_drivers, driver_id } = Astro.props;
-console.log(all_drivers)
 ---
 
 <Layout title={title} subtitle={Astro.props.subtitle}>
@@ -23,21 +22,34 @@ console.log(all_drivers)
   </div>
   <div>
     <div class="my-2 w-full">
-        <div class="mb-1 font-bold">Driver Name</div>
+      <div class="mb-1 font-bold">Driver Name</div>
       <select
         class="w-full p-2 border border-gray-300 rounded"
         name="driver_id"
         id="driver_id"
+        data-default={driver_id}
       >
-      {!driver_id && <option value="" selected>Choose a driver</option>}
-      {Object.entries(all_drivers || {}).map(([id, name]) => (
-        <option value={id} selected={id === driver_id}>{name}</option>
-      ))}
+        {
+          !driver_id && (
+            <option value="" selected>
+              Choose a driver
+            </option>
+          )
+        }
+        {
+          Object.entries(all_drivers || {}).map(([id, name]) => (
+            <option value={id} selected={id === driver_id}>
+              {name}
+            </option>
+          ))
+        }
       </select>
     </div>
     <script>
-      document.getElementsByName("driver_id")[0].addEventListener("change", (e) => {
-        const selectedDriverId = (e.target as HTMLSelectElement).value;
+      document.getElementsByName("driver_id")[0].addEventListener("change", e => {
+        const el = e.target as HTMLSelectElement;
+        const selectedDriverId = el.value;
+        el.value = el.dataset.default || "";
         const url = new URL(window.location.href);
         url.pathname = `/${selectedDriverId}/`;
         window.location.replace(url.toString());

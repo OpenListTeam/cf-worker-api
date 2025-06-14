@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build --mode production --outDir ../public",
+    "build": "astro build --mode production",
     "preview": "astro preview",
     "astro": "astro",
     "format": "biome check --write",
@@ -21,6 +21,7 @@
     "astro": "^5.9.2",
     "sass": "^1.89.2",
     "solid-js": "^1.9.7",
-    "tailwindcss": "^4.1.10"
+    "tailwindcss": "^4.1.10",
+    "vite": "^6.3.5"
   }
 }

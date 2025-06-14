@@ -9,11 +9,10 @@ port           = 8787
 local_protocol = "http"
 
 [site]
-bucket = "public"
-
+bucket = "./public"
 
 [vars]
-MAIN_URL = "http://localhost:4321/api"
+MAIN_URL = "http://localhost:8787"
 
 [env.production.vars]
-MAIN_URL = "https://api.oplist.org/api"
+MAIN_URL = "https://api.oplist.org"

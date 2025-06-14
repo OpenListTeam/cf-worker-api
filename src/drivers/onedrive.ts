@@ -101,7 +101,7 @@ const oneToken = createMiddleware<HonoEnv>(async (c) => {
   // biome-ignore lint/suspicious/noExplicitAny: response can be any type
   const json: Record<string, any> = await response.json();
   if (c.get("from_browser")) {
-    return c.navigate_to("/onedrive", {
+    return c.resolve("onedrive", {
       access_token: json.access_token,
       refresh_token: json.refresh_token,
       client_id: client_id,
