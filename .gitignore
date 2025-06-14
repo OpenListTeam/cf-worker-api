@@ -1,11 +1,11 @@
-tmp/
-_tmp/
+/tmp
 /out-tsc
 
 /.pnp
 .pnp.js
 
 /public
+!/public/.gitkeep
 
 .wrangler/*
 

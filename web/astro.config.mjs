@@ -3,10 +3,12 @@ import solidJs from "@astrojs/solid-js";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 import toml from "toml";
+import transformTsx from "./transform";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [solidJs()],
+  integrations: [transformTsx(), solidJs()],
+  outDir: "../public",
   vite: {
     plugins: [
       tailwindcss(),
