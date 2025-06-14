@@ -39,6 +39,7 @@ export default function transformTsx() {
     name: "form-to-astro-plugin",
     hooks: {
       "astro:build:setup": setupTransform,
+      "astro:server:setup": setupTransform,
     },
   };
 }
