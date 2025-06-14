@@ -5,6 +5,7 @@ import manifest from '__STATIC_CONTENT_MANIFEST'
 import * as local from "hono/cookie";
 import * as oneui from './oneui';
 import * as aliui from './aliui';
+import * as aliui2 from './aliui2';
 import * as ui115 from './115ui';
 import * as ui123 from './123ui';
 import * as baidu from './baidu';
@@ -38,6 +39,26 @@ app.get('/alicloud/requests', async (c: Context) => {
 // 令牌申请 ##############################################################################
 app.get('/alicloud/callback', async (c: Context) => {
     return aliui.alyToken(c);
+});
+
+// 阿里云盘扫码2 - 生成二维码 ##############################################################################
+app.get('/alicloud2/generate_qr', async (c: Context) => {
+    return aliui2.generateQR(c);
+});
+
+// 阿里云盘扫码2 - 检查登录状态 ##############################################################################
+app.get('/alicloud2/check_login', async (c: Context) => {
+    return aliui2.checkLogin(c);
+});
+
+// 阿里云盘扫码2 - 获取用户信息 ##############################################################################
+app.get('/alicloud2/get_user_info', async (c: Context) => {
+    return aliui2.getUserInfo(c);
+});
+
+// 阿里云盘扫码2 - 退出登录 ##############################################################################
+app.get('/alicloud2/logout', async (c: Context) => {
+    return aliui2.logout(c);
 });
 
 // 登录申请 ##############################################################################

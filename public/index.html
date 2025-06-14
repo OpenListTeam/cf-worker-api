@@ -91,6 +91,121 @@
         [data-theme="dark"] p {
             color: #ffffff;
         }
+
+        /* 阿里云盘扫码v2样式 */
+        .qr-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .qr-modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        [data-theme="dark"] .qr-modal-content {
+            background-color: #2a2a3b;
+            color: #f0f0f0;
+        }
+
+        .qr-code-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        [data-theme="dark"] .qr-code-container {
+            background: #1a1a2e;
+        }
+
+        .qr-code-img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+        }
+
+        .qr-status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .qr-status.waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .qr-status.scaned {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .qr-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .qr-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        [data-theme="dark"] .qr-status.waiting {
+            background: #3d3d00;
+            color: #ffeb3b;
+            border: 1px solid #ffeb3b;
+        }
+
+        [data-theme="dark"] .qr-status.scaned {
+            background: #003d4d;
+            color: #00bcd4;
+            border: 1px solid #00bcd4;
+        }
+
+        [data-theme="dark"] .qr-status.success {
+            background: #1b5e20;
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+
+        [data-theme="dark"] .qr-status.error {
+            background: #5d1a1a;
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: black;
+        }
+
+        [data-theme="dark"] .close-btn:hover {
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -108,6 +223,7 @@
             <option value="onedrive_us">OneDrive 美国版本</option>
             <option value="onedrive_de">OneDrive 德国版本</option>
             <option value="alicloud_qr">阿里网盘 扫码登录</option>
+            <option value="alicloud_qr2">阿里云盘 扫码登录v2</option>
             <option value="baiduyun_go">百度网盘 验证登录</option>
             <option value="115cloud_go">115 网盘 验证登录</option>
             <option value="123cloud_go">123 网盘 直接登录</option>
@@ -165,6 +281,22 @@
         </p>
     </div>
 </div>
+
+<!-- 阿里云盘扫码v2模态框 -->
+<div id="qr-modal" class="qr-modal">
+    <div class="qr-modal-content">
+        <span class="close-btn" onclick="closeQRModal()">&times;</span>
+        <h4>阿里云盘扫码登录v2</h4>
+        <div id="qr-code-container" class="qr-code-container" style="display: none;">
+            <div id="qr-code-display"></div>
+        </div>
+        <div id="qr-status" class="qr-status" style="display: none;"></div>
+        <div class="mt-3">
+            <button id="refresh-qr-btn" class="btn btn-secondary" onclick="refreshQRCode()" style="display: none;">刷新二维码</button>
+            <button class="btn btn-secondary" onclick="closeQRModal()">关闭</button>
+        </div>
+    </div>
+</div>
 </div>
 
 <script>
@@ -178,7 +310,8 @@
         let apps_type = document.getElementById("site-select").value;
         let secret_key = document.getElementById("secret-key").value;
         console.log(server_use);
-        if (!server_use && (apps_uuid === "" || apps_keys === "")) {
+        // 阿里云盘扫码登录v2不需要验证客户端ID和应用机密
+        if (apps_type !== "alicloud_qr2" && !server_use && (apps_uuid === "" || apps_keys === "")) {
             Swal.fire({
                 position: 'top',
                 icon: 'info',
@@ -188,6 +321,12 @@
             });
             return;
         }
+        // 阿里云盘扫码v2直接调用专用API，不需要构建传统的requests路径
+        if (apps_type === "alicloud_qr2") {
+            await startAlicloud2Login();
+            return;
+        }
+        
         let apps_subs = apps_type.split("_")[0]
         let post_urls = "/" + apps_subs + "/requests?client_uid=" + apps_uuid
             + "&client_key=" + apps_keys + "&apps_types=" + apps_type
@@ -232,6 +371,7 @@
                             + `&client_key=${apps_keys}`;
                     }
                 }
+
             } else Swal.fire({
                 icon: 'error',
                 title: "获取秘钥失败: " + response_data.text,
@@ -303,6 +443,44 @@
             // 更新输入框的值
             callbackUrlInput.value = `https://api.oplist.org/${selectedValue}/callback`;
             document.getElementById('secret-key-view').hidden = true;
+            
+            const clientIdInput = document.getElementById('client-id');
+            const appSecretInput = document.getElementById('app-secret');
+            const serverUseCheckbox = document.getElementById('server_use');
+            const clientIdContainer = clientIdInput.closest('.mb-3');
+            const appSecretContainer = appSecretInput.closest('.mb-3');
+            const serverUseContainer = serverUseCheckbox.closest('.mb-3');
+            const callbackContainer = callbackUrlInput.closest('.mb-3');
+            
+            // 阿里云盘扫码登录v2不需要客户端ID、应用机密和回调地址
+            if (siteSelect.value === "alicloud_qr2") {
+                // 隐藏整个字段容器
+                clientIdContainer.style.display = 'none';
+                appSecretContainer.style.display = 'none';
+                serverUseContainer.style.display = 'none';
+                callbackContainer.style.display = 'none';
+                
+                // 清空值
+                clientIdInput.value = '';
+                appSecretInput.value = '';
+                serverUseCheckbox.checked = false;
+            } else {
+                // 恢复显示
+                clientIdContainer.style.display = 'block';
+                appSecretContainer.style.display = 'block';
+                serverUseContainer.style.display = 'block';
+                callbackContainer.style.display = 'block';
+                
+                // 恢复正常状态
+                if (!serverUseCheckbox.checked) {
+                    clientIdInput.disabled = false;
+                    appSecretInput.disabled = false;
+                }
+                clientIdInput.placeholder = '';
+                appSecretInput.placeholder = '';
+                serverUseCheckbox.disabled = false;
+            }
+            
             if (siteSelect.value === "baiduyun_go") {
                 document.getElementById('secret-key-view').hidden = false;
             }
@@ -314,6 +492,7 @@
             const secretKeyInput = document.getElementById('secret-key');
             const server_flag = document.getElementById('server_use');
             if ((siteSelect.value === "alicloud_qr"
+                || siteSelect.value === "alicloud_qr2"
                 || siteSelect.value === "123cloud_go"
                 || siteSelect.value === "onedrive_cn"
                 || siteSelect.value === "onedrive_us"
@@ -376,6 +555,269 @@
     })();
 
     getToken();
+
+    // 阿里云盘扫码v2相关变量
+    let alicloud2SessionId = null;
+    let alicloud2CheckInterval = null;
+    let alicloud2StartTime = null;
+    let clientFingerprint = null;
+
+    // 生成客户端指纹
+    function generateClientFingerprint() {
+        if (clientFingerprint) return clientFingerprint;
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('Client fingerprint', 2, 2);
+        
+        const fingerprint = [
+            navigator.userAgent,
+            navigator.language,
+            screen.width + 'x' + screen.height,
+            new Date().getTimezoneOffset(),
+            canvas.toDataURL(),
+            navigator.hardwareConcurrency || 'unknown',
+            navigator.deviceMemory || 'unknown'
+        ].join('|');
+        
+        // 生成简单的哈希
+        let hash = 0;
+        for (let i = 0; i < fingerprint.length; i++) {
+            const char = fingerprint.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // 转换为32位整数
+        }
+        
+        clientFingerprint = Math.abs(hash).toString(36);
+        console.log('客户端指纹生成:', clientFingerprint);
+        return clientFingerprint;
+    }
+
+    // 发送带有客户端指纹的请求
+    async function fetchWithFingerprint(url, options = {}) {
+        const fingerprint = generateClientFingerprint();
+        const headers = {
+            'X-Client-Fingerprint': fingerprint,
+            ...options.headers
+        };
+        
+        return fetch(url, {
+            ...options,
+            headers
+        });
+    }
+
+    // 启动阿里云盘扫码v2登录
+    async function startAlicloud2Login() {
+        try {
+            // 显示模态框
+            document.getElementById('qr-modal').style.display = 'block';
+            setQRStatus('正在生成二维码...', 'waiting');
+
+            // 生成二维码 - 使用带指纹的请求
+            const response = await fetchWithFingerprint('/alicloud2/generate_qr');
+            const result = await response.json();
+
+            if (result.success) {
+                alicloud2SessionId = result.session_id;
+                alicloud2StartTime = Date.now();
+                showQRCode(result.qr_code_url);
+                setQRStatus('请使用阿里云盘App扫描二维码', 'waiting');
+                
+                // 显示过期时间信息
+                if (result.expires_in) {
+                    const expireMinutes = Math.floor(result.expires_in / 60);
+                    console.log(`会话将在 ${expireMinutes} 分钟后过期`);
+                }
+                
+                startStatusCheck();
+            } else {
+                setQRStatus(result.error || '生成二维码失败', 'error');
+                document.getElementById('refresh-qr-btn').style.display = 'inline-block';
+            }
+        } catch (error) {
+            setQRStatus('网络错误，请重试', 'error');
+            document.getElementById('refresh-qr-btn').style.display = 'inline-block';
+            console.error('生成二维码失败:', error);
+        }
+    }
+
+    // 显示二维码
+    function showQRCode(qrUrl) {
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`;
+        document.getElementById('qr-code-display').innerHTML = `<img src="${qrApiUrl}" alt="二维码" class="qr-code-img">`;
+        document.getElementById('qr-code-container').style.display = 'block';
+    }
+
+    // 设置状态
+    function setQRStatus(message, type) {
+        const statusEl = document.getElementById('qr-status');
+        statusEl.textContent = message;
+        statusEl.className = `qr-status ${type}`;
+        statusEl.style.display = 'block';
+    }
+
+    // 开始状态检查
+    function startStatusCheck() {
+        stopStatusCheck();
+        alicloud2CheckInterval = setInterval(checkAlicloud2Status, 2000);
+    }
+
+    // 停止状态检查
+    function stopStatusCheck() {
+        if (alicloud2CheckInterval) {
+            clearInterval(alicloud2CheckInterval);
+            alicloud2CheckInterval = null;
+        }
+    }
+
+    // 检查登录状态
+    async function checkAlicloud2Status() {
+        if (!alicloud2SessionId) return;
+
+        // 检查是否超过3分钟（二维码可能过期）
+        const elapsed = Date.now() - alicloud2StartTime;
+        if (elapsed > 180000) { // 3分钟
+            setQRStatus('二维码可能已过期，建议点击刷新重新生成', 'error');
+            document.getElementById('refresh-qr-btn').style.display = 'inline-block';
+            stopStatusCheck();
+            return;
+        }
+
+        try {
+            // 使用带指纹的请求
+            const response = await fetchWithFingerprint(`/alicloud2/check_login?session_id=${alicloud2SessionId}`);
+            const result = await response.json();
+
+            if (result.success) {
+                switch (result.status) {
+                    case 'WAITING':
+                        const waitTime = Math.floor(elapsed / 1000);
+                        setQRStatus(`等待扫描... (${waitTime}s) 请使用阿里云盘App扫码`, 'waiting');
+                        break;
+                    case 'SCANED':
+                        setQRStatus('已扫描，请在手机上确认登录', 'scaned');
+                        break;
+                    case 'CONFIRMED':
+                        setQRStatus('登录成功！正在获取用户信息...', 'success');
+                        stopStatusCheck();
+                        // 稍等一下确保token已保存
+                        setTimeout(async () => {
+                            await getAlicloud2UserInfo();
+                        }, 1000);
+                        break;
+                    case 'EXPIRED':
+                        setQRStatus('二维码已过期，请点击刷新重新生成', 'error');
+                        stopStatusCheck();
+                        document.getElementById('refresh-qr-btn').style.display = 'inline-block';
+                        break;
+                }
+            } else {
+                // 处理会话验证失败的情况
+                if (response.status === 403) {
+                    setQRStatus('会话验证失败，请重新生成二维码', 'error');
+                    document.getElementById('refresh-qr-btn').style.display = 'inline-block';
+                    stopStatusCheck();
+                } else {
+                    setQRStatus('检查状态失败: ' + (result.error || '未知错误'), 'error');
+                    document.getElementById('refresh-qr-btn').style.display = 'inline-block';
+                }
+            }
+        } catch (error) {
+            console.error('检查登录状态失败:', error);
+            setQRStatus('网络连接失败，请检查网络后重试', 'error');
+            document.getElementById('refresh-qr-btn').style.display = 'inline-block';
+        }
+    }
+
+    // 获取用户信息
+    async function getAlicloud2UserInfo() {
+        if (!alicloud2SessionId) return;
+
+        try {
+            // 使用带指纹的请求
+            const response = await fetchWithFingerprint(`/alicloud2/get_user_info?session_id=${alicloud2SessionId}`);
+            const result = await response.json();
+
+            if (result.success && result.user_info) {
+                // 关闭模态框
+                closeQRModal();
+                
+                // 显示成功消息
+                await Swal.fire({
+                    position: 'top',
+                    icon: 'success',
+                    title: '登录成功',
+                    html: `<div>用户: ${result.user_info.nick_name || result.user_info.user_id}</div>`,
+                    showConfirmButton: true
+                });
+
+                // 填充token字段（使用真实的tokens）
+                if (result.access_token) {
+                    document.getElementById("access-token").value = result.access_token;
+                }
+                if (result.refresh_token) {
+                    document.getElementById("refresh-token").value = result.refresh_token;
+                }
+                
+                // 清理会话
+                await fetchWithFingerprint(`/alicloud2/logout?session_id=${alicloud2SessionId}`);
+                alicloud2SessionId = null;
+            } else {
+                // 处理会话验证失败的情况
+                if (response.status === 403) {
+                    setQRStatus('会话验证失败，请重新登录', 'error');
+                } else {
+                    setQRStatus('获取用户信息失败: ' + (result.error || '未知错误'), 'error');
+                }
+            }
+        } catch (error) {
+            setQRStatus('获取用户信息失败', 'error');
+            console.error('获取用户信息失败:', error);
+        }
+    }
+
+    // 刷新二维码
+    async function refreshQRCode() {
+        document.getElementById('refresh-qr-btn').style.display = 'none';
+        // 清理旧会话
+        if (alicloud2SessionId) {
+            try {
+                await fetchWithFingerprint(`/alicloud2/logout?session_id=${alicloud2SessionId}`);
+            } catch (e) {
+                console.log('清理旧会话失败:', e);
+            }
+            alicloud2SessionId = null;
+        }
+        await startAlicloud2Login();
+    }
+
+    // 关闭模态框
+    function closeQRModal() {
+        document.getElementById('qr-modal').style.display = 'none';
+        stopStatusCheck();
+        
+        // 清理会话
+        if (alicloud2SessionId) {
+            fetchWithFingerprint(`/alicloud2/logout?session_id=${alicloud2SessionId}`);
+            alicloud2SessionId = null;
+        }
+        
+        // 重置界面
+        document.getElementById('qr-code-container').style.display = 'none';
+        document.getElementById('qr-status').style.display = 'none';
+        document.getElementById('refresh-qr-btn').style.display = 'none';
+    }
+
+    // 点击模态框外部关闭
+    window.onclick = function(event) {
+        const modal = document.getElementById('qr-modal');
+        if (event.target === modal) {
+            closeQRModal();
+        }
+    }
 </script>
 </body>
 </html>
