@@ -9,8 +9,8 @@ export function openURL(url: string, target: "_blank" | "_self" = "_blank") {
   a.remove();
 }
 
-export function getFormData(blacklistFields: string[] = []): FormData {
-  const form = document.getElementById("form-list") as HTMLFormElement;
+export function getFormData(selector: string, blacklistFields: string[] = []): FormData {
+  const form = document.querySelector(selector) as HTMLFormElement;
   const formData = new FormData(form);
   const filteredData = new FormData();
   formData.forEach((value, key) => {

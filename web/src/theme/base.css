@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@layer components {
+  .form-checkbox {
+    @apply h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary;
+  }
+  .form-checkbox:checked {
+    @apply bg-primary border-transparent;
+  }
+  .form-checkbox:focus {
+    @apply ring-2 ring-offset-2 ring-primary;
+  }
+  .form-checkbox:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+}

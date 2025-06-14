@@ -1,5 +1,5 @@
 import Cookie from "@/utils/cookie";
-import Button from "@/widgets/Button";
+import { Button } from "@/widgets/Form";
 
 const clean_list = ["from_browser", "resolve_data"];
 
@@ -20,7 +20,7 @@ export function ClearDataButton(props: { class?: string }) {
         window.location.reload();
       }}
     >
-      Clear Saved Data
+      Clear Local Data
     </Button>
   );
 }

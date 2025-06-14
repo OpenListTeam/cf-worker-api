@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./base.css";
 
 /* color partially pick from element plus */
 @theme {

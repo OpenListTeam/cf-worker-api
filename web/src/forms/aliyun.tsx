@@ -1,5 +1,5 @@
-import { type FormSchema, getFormData, loadFromCookieData, openURL } from "@/utils/form";
-import Button from "@/widgets/Button";
+import { getFormData, loadFromCookieData, openURL } from "@/utils/form";
+import { Button, FieldBox, Form, Input, TextArea } from "@/widgets/Form";
 import { onMount } from "solid-js";
 
 export const NAME = "Aliyun";
@@ -7,13 +7,9 @@ export const NAME = "Aliyun";
 const blacklist_form_fields = ["driver_id", "access_token", "refresh_token"];
 
 export default function (props: { driver_id: string; endpoint: string }) {
-  const schema: FormSchema = {
-    callback_uri: `${props.endpoint}/aliyun/callback`,
-  };
-
   function submit() {
     const prepareUrl = `${props.endpoint}/${props.driver_id}/prepare`;
-    const formData = getFormData(blacklist_form_fields);
+    const formData = getFormData("#form-list", blacklist_form_fields);
     const params = new URLSearchParams();
     formData.forEach((value, key) => {
       if (!blacklist_form_fields.includes(key)) {
@@ -28,77 +24,31 @@ export default function (props: { driver_id: string; endpoint: string }) {
     loadFromCookieData();
   });
   return (
-    <form id="form-list" target="form-list-iframe" class="w-full">
-      <iframe class="hidden" name="form-list-iframe" title="nop" />
-      <div class="my-2 w-full">
-        <div class="mb-1 font-bold">client_id</div>
-        <div>
-          <input
-            type="text"
-            name="client_id"
-            class="w-full p-2 border border-gray-300 rounded"
-            placeholder="Client ID"
-            // required
-            value={schema?.client_id || ""}
-          />
-        </div>
-      </div>
-      <div class="my-2 w-full">
-        <div class="mb-1 font-bold">client_secret</div>
-        <div>
-          <input
-            type="text"
-            name="client_secret"
-            class="w-full p-2 border border-gray-300 rounded"
-            placeholder="Client Secret"
-            // required
-            value={schema?.client_secret || ""}
-          />
-        </div>
-      </div>
-      <div class="my-2 w-full">
-        <div class="mb-1 font-bold">Callback URL</div>
-        <div>
-          <input
-            type="text"
-            name="callback_uri"
-            class="w-full p-2 border border-gray-300 rounded"
-            placeholder="Callback URL"
-            // required
-            value={schema?.callback_uri || ""}
-          />
-        </div>
-      </div>
-      <input name="from_browser" type="hidden" value="true" />
-      <div class="my-2 w-full">
-        <Button class="w-full" onClick={(_) => submit()}>
-          Get Token
-        </Button>
-      </div>
-      <div class="my-2 w-full">
-        <div class="mb-1 font-bold">access_token</div>
-        <div>
-          <textarea
-            name="access_token"
-            class="w-full p-2 border border-gray-300 rounded"
-            placeholder="Access Token"
-            rows="4"
-            readonly
-          />
-        </div>
-      </div>
-      <div class="my-2 w-full">
-        <div class="mb-1 font-bold">refresh_token</div>
-        <div>
-          <textarea
-            name="refresh_token"
-            class="w-full p-2 border border-gray-300 rounded"
-            placeholder="Refresh Token"
-            rows="4"
-            readonly
-          />
-        </div>
-      </div>
-    </form>
+    <Form id="form-list" noTarget>
+      <FieldBox label="Client ID">
+        <Input type="text" name="client_id" placeholder="Client ID" />
+      </FieldBox>
+      <FieldBox label="Client Secret">
+        <Input type="text" name="client_secret" placeholder="Client Secret" />
+      </FieldBox>
+      <FieldBox label="Callback URL">
+        <input
+          type="text"
+          name="callback_uri"
+          class="w-full p-2 border border-gray-300 rounded"
+          placeholder="Callback URL"
+          value={`${props.endpoint}/aliyun/callback`}
+        />
+      </FieldBox>
+      <FieldBox>
+        <Button onClick={submit}>Get Token</Button>
+      </FieldBox>
+      <FieldBox label="Access Token">
+        <TextArea name="access_token" placeholder="Access Token" />
+      </FieldBox>
+      <FieldBox label="Refresh Token">
+        <TextArea name="refresh_token" placeholder="Refresh Token" />
+      </FieldBox>
+    </Form>
   );
 }
