@@ -1,6 +1,7 @@
 import * as local from "hono/cookie";
 import {Context} from "hono";
 import {showErr} from "./error";
+import {encodeCallbackData} from "./utils";
 
 
 const driver_map: string[] = [
@@ -64,7 +65,6 @@ export async function oneToken(c: Context) {
         }
         random_key = <string>local.getCookie(c, 'random_key')
         driver_txt = local.getCookie(c, 'driver_txt')
-        // console.log(login_data, random_uid, client_uid, client_key, random_key, driver_txt)
 
         params_all = {
             'client_id': server_use == "true" ? c.env.googleui_uid : client_uid,
@@ -76,7 +76,13 @@ export async function oneToken(c: Context) {
     } catch (error) {
         return c.redirect(showErr(<string>error, "", ""));
     }
-    console.log(params_all);
+
+    // 避免key泄漏
+    if (server_use == "true") {
+        client_uid = "";
+        client_key = "";
+    }
+
     // 执行请求 ===========================================================================
     try {
         const paramsString = new URLSearchParams(params_all).toString();
@@ -92,15 +98,15 @@ export async function oneToken(c: Context) {
         local.deleteCookie(c, 'driver_txt');
         local.deleteCookie(c, 'server_use');
         let json: Record<string, any> = await response.json();
-        console.log(json);
         if (json.token_type == "Bearer") {
-            return c.redirect(
-                `/?access_token=${json.access_token}`
-                + `&refresh_token=${json.refresh_token}`
-                + `&client_uid=${server_use == "true" ? "" : client_uid}`
-                + `&client_key=${server_use == "true" ? "" : client_key}`
-                + `&driver_txt=${driver_txt}`
-            );
+            const callbackData: CallbackData = {
+                access_token: json.access_token,
+                refresh_token: json.refresh_token,
+                client_uid: client_uid,
+                client_key: client_key,
+                driver_txt: driver_txt,
+            };
+            return c.redirect("/#" + encodeCallbackData(callbackData));
         }
         return c.redirect(showErr(json.message, client_uid, client_key));
     } catch (error) {

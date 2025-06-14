@@ -1,6 +1,7 @@
 import * as local from "hono/cookie";
 import {Context} from "hono";
 import {showErr} from "./error";
+import {encodeCallbackData} from "./utils";
 
 
 const driver_map: string[] = [
@@ -17,7 +18,7 @@ export async function oneLogin(c: Context) {
     if (server_use == "false" && (!driver_txt || !client_uid || !client_key))
         return c.json({text: "参数缺少"}, 500);
     const random_key = getRandomString(64);
-    console.log(server_use);
+
     // 请求参数 ==========================================================================
     const params_all: Record<string, any> = {
         client_id: server_use == "true" ? c.env.cloud115_uid : client_uid,
@@ -39,7 +40,6 @@ export async function oneLogin(c: Context) {
         local.setCookie(c, 'driver_txt', driver_txt);
         local.setCookie(c, 'random_key', random_key);
         local.setCookie(c, 'server_use', server_use);
-        console.log(response);
         return c.json({text: response.url}, 200);
     } catch (error) {
         return c.json({text: error}, 500);
@@ -49,7 +49,7 @@ export async function oneLogin(c: Context) {
 // 令牌申请 ##############################################################################
 export async function oneToken(c: Context) {
     let login_data, client_uid, client_key, random_key, client_url;
-    let server_use, params_all, random_uid, driver_txt;
+    let server_use, params_all: Record<string, any>, random_uid, driver_txt;
     try { // 请求参数 ====================================================================
         login_data = c.req.query('code');
         random_uid = c.req.query('state');
@@ -75,7 +75,12 @@ export async function oneToken(c: Context) {
     } catch (error) {
         return c.redirect(showErr(<string>error, "", ""));
     }
-    // console.log(login_data);
+
+    // 避免key泄漏
+    if (server_use == "true") {
+        client_uid = "";
+        client_key = "";
+    }
 
     // 执行请求 ===========================================================================
     try {
@@ -95,13 +100,15 @@ export async function oneToken(c: Context) {
         local.deleteCookie(c, 'server_use');
         let json: Record<string, any> = await response.json();
         if (json.state == 1) {
-            return c.redirect(
-                `/?access_token=${json.data.access_token}`
-                + `&refresh_token=${json.data.refresh_token}`
-                + `&client_uid=${server_use == "true" ? "" : client_uid}`
-                + `&client_key=${server_use == "true" ? "" : client_key}`
-                + `&driver_txt=${driver_txt}`
-            );
+            const callbackData: CallbackData  = {
+                access_token: json.data.access_token,
+                refresh_token: json.data.refresh_token,
+                client_uid: client_uid,
+                client_key: client_key,
+                driver_txt: driver_txt,
+                server_use: server_use,
+            };
+            return c.redirect("/#" + encodeCallbackData(callbackData));
         }
         return c.redirect(showErr(json.message, client_uid, client_key));
     } catch (error) {
