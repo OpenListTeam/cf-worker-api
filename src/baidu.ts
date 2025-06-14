@@ -10,17 +10,15 @@ const driver_map: string[] = [
 
 // 登录申请 ##############################################################################
 export async function oneLogin(c: Context) {
-    const client_uid: string = <string>c.req.query('client_uid');
     const client_key: string = <string>c.req.query('client_key');
     const secret_key: string = <string>c.req.query('secret_key');
     const driver_txt: string = <string>c.req.query('apps_types');
     const server_use: string = <string>c.req.query('server_use');
-    if (server_use == "false" && (!driver_txt || !client_uid || !client_key || !secret_key))
+    if (server_use == "false" && (!driver_txt || !client_key || !secret_key))
         return c.json({text: "参数缺少"}, 500);
     // 请求参数 ==========================================================================
     const params_all: Record<string, any> = {
         client_id: server_use == "true" ? c.env.baiduyun_key : client_key,
-        device_id: server_use == "true" ? c.env.baiduyun_uid : client_uid,
         scope: "basic,netdisk",
         response_type: 'code',
         redirect_uri: 'https://' + c.env.MAIN_URLS + '/baiduyun/callback'
@@ -35,7 +33,6 @@ export async function oneLogin(c: Context) {
             method: 'GET',
         });
         if (server_use == "false") {
-            local.setCookie(c, 'client_uid', client_uid);
             local.setCookie(c, 'client_key', client_key);
             local.setCookie(c, 'secret_key', secret_key);
         }
@@ -50,18 +47,17 @@ export async function oneLogin(c: Context) {
 
 // 令牌申请 ##############################################################################
 export async function oneToken(c: Context) {
-    let login_data, client_uid, client_key, secret_key, client_url;
+    let login_data, client_key, secret_key, client_url;
     let driver_txt, server_use, params_all: Record<string, any>;
     try { // 请求参数 ====================================================================
         login_data = c.req.query('code');
         server_use = local.getCookie(c, 'server_use')
         driver_txt = local.getCookie(c, 'driver_txt')
-        client_uid = client_key = secret_key = ""
+        client_key = secret_key = ""
         if (server_use == "false") {
-            client_uid = local.getCookie(c, 'client_uid')
             client_key = local.getCookie(c, 'client_key')
             secret_key = local.getCookie(c, 'secret_key')
-            if (!login_data || !client_uid || !client_key || !secret_key)
+            if (!login_data || !client_key || !secret_key)
                 return c.redirect(showErr("Cookie缺少", "", ""));
         }
 
@@ -87,7 +83,6 @@ export async function oneToken(c: Context) {
         });
         const response: Response = await fetch(urlWithParams, {method: 'GET'});
         if (server_use == "false") {
-            local.deleteCookie(c, 'client_uid');
             local.deleteCookie(c, 'client_key');
             local.deleteCookie(c, 'secret_key');
         }
@@ -99,15 +94,14 @@ export async function oneToken(c: Context) {
             return c.redirect(
                 `/?access_token=${json.access_token}`
                 + `&refresh_token=${json.refresh_token}`
-                + `&client_uid=${client_uid}`
                 + `&client_key=${server_use == "true" ? "" : client_key}`
                 + `&secret_key=${server_use == "true" ? "" : secret_key}`
                 + `&driver_txt=${driver_txt}`
             );
         }
-        return c.redirect(showErr(json.error_description, client_uid, client_key));
+        return c.redirect(showErr(json.error_description, client_key));
     } catch (error) {
-        return c.redirect(showErr(<string>error, client_uid, client_key));
+        return c.redirect(showErr(<string>error, client_key));
     }
 }
 
