@@ -1,6 +1,7 @@
 import * as local from "hono/cookie";
 import {Context} from "hono";
 import {showErr} from "./error";
+import {encodeCallbackData} from "./utils";
 
 
 const driver_map: string[] = [
@@ -41,7 +42,6 @@ export async function oneLogin(c: Context) {
         }
         local.setCookie(c, 'driver_txt', driver_txt);
         local.setCookie(c, 'server_use', server_use);
-        console.log(response.url);
         return c.json({text: response.url}, 200);
     } catch (error) {
         return c.json({text: error}, 500);
@@ -76,7 +76,13 @@ export async function oneToken(c: Context) {
     } catch (error) {
         return c.redirect(showErr(<string>error, "", ""));
     }
-    // console.log(login_data);
+
+    // 避免key泄漏
+    if (server_use == "true") {
+        client_uid = "";
+        client_key = "";
+        secret_key = "";
+    }
 
     // 执行请求 ===========================================================================
     try {
@@ -94,16 +100,16 @@ export async function oneToken(c: Context) {
         local.deleteCookie(c, 'driver_txt');
         local.deleteCookie(c, 'server_use');
         const json: Record<string, any> = await response.json();
-        console.log(response, json);
         if (response.ok) {
-            return c.redirect(
-                `/?access_token=${json.access_token}`
-                + `&refresh_token=${json.refresh_token}`
-                + `&client_uid=${client_uid}`
-                + `&client_key=${server_use == "true" ? "" : client_key}`
-                + `&secret_key=${server_use == "true" ? "" : secret_key}`
-                + `&driver_txt=${driver_txt}`
-            );
+            const callbackData: CallbackData = {
+                access_token: json.access_token,
+                refresh_token: json.refresh_token,
+                client_uid: client_uid,
+                client_key: client_key,
+                secret_key: secret_key,
+                driver_txt: driver_txt,
+            };
+            return c.redirect("/#" + encodeCallbackData(callbackData));
         }
         return c.redirect(showErr(json.error_description, client_uid, client_key));
     } catch (error) {
