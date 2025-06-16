@@ -11,6 +11,8 @@
 # "115cloud_key": "",
 # "googleui_uid": "",
 # "googleui_key": ""
+# "yandexui_uid": "",
+# "yandexui_key": ""
 #替换目录下wrangler文件中的MAIN_URLS
 if [ -z "${OPLIST_MAIN_URLS}" ]; then
     echo "MAIN_URLS is not set, skipping replacement."
@@ -95,6 +97,20 @@ if [ -z "${OPLIST_GOOGLEUI_KEY}" ]; then
 else
     echo "Replacing googleui_key in wrangler file..."
     sed -i "s|\"googleui_key\":.*|\"googleui_key\": \"${OPLIST_GOOGLEUI_KEY}\",|" ./wrangler.jsonc
+fi
+# 替换目录下wrangler文件中的yandexui_uid
+if [ -z "${OPLIST_YANDEXUI_UID}" ]; then
+    echo "YANDEXUI_UID is not set, skipping replacement."
+else
+    echo "Replacing yandexui_uid in wrangler file..."
+    sed -i "s|\"yandexui_uid\":.*|\"yandexui_uid\": \"${OPLIST_YANDEXUI_UID}\",|" ./wrangler.jsonc
+fi
+# 替换目录下wrangler文件中的yandexui_key
+if [ -z "${OPLIST_YANDEXUI_KEY}" ]; then
+    echo "YANDEXUI_KEY is not set, skipping replacement."
+else
+    echo "Replacing yandexui_key in wrangler file..."
+    sed -i "s|\"yandexui_key\":.*|\"yandexui_key\": \"${OPLIST_YANDEXUI_KEY}\",|" ./wrangler.jsonc
 fi
 echo "Modified wrangler.jsonc file:"
 cat ./wrangler.jsonc
