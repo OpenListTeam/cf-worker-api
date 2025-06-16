@@ -6,26 +6,32 @@ async function getLogin(refresh = false) {
     let apps_uuid = document.getElementById("client-id").value;
     let apps_keys = document.getElementById("app-secret").value;
     let apps_type = document.getElementById("site-select").value;
-
+    let apps_subs = apps_type.split("_")[0]
     console.log(server_use);
+    let check_flag = true;
     // 验证秘钥情况 ==================================================
-    if (// 阿里云盘扫码登录v2不需要验证客户端ID和应用机密
-        (apps_type !== "alicloud_oa" && apps_type !== "baiduyun_go" &&
-            !server_use && (apps_uuid === "" || apps_keys === "")) ||
-        (apps_type === "baidunuy_go" && // 百度网盘不需ID
-            !server_use && (secret_key === "" || apps_keys === ""))
-    ) {
-        await Swal.fire({
-            position: 'top',
-            icon: 'info',
-            title: '获取失败',
-            text: '请先填写AppID和AppKey',
-            showConfirmButton: true,
-        });
-        return;
+    if (!server_use) {
+        if (apps_type !== "alicloud_oa" &&
+            apps_type !== "baidunuy_go" &&
+            apps_type !== "baiduyun_ob")
+            if (apps_uuid === "" || apps_keys === "")
+                check_flag = false
+        if (apps_subs === "baidunuy")
+            if (secret_key === "" || apps_keys === "")
+                check_flag = false
+        if (!check_flag) {
+            await Swal.fire({
+                position: 'top',
+                icon: 'info',
+                title: '获取失败',
+                text: '请先填写AppID和AppKey',
+                showConfirmButton: true,
+            });
+            return;
+        }
     }
     // 阿里云盘扫码v2直接调用专用API，不需要构建传统的requests路径
-    if (apps_type === "alicloud_oa") {
+    if (apps_type === "alicloud_oa" && !refresh) {
         await startAlicloud2Login();
         return;
     }
@@ -45,7 +51,8 @@ async function getLogin(refresh = false) {
         base_urls = "/renewapi?client_uid="
     }
 
-    let apps_subs = apps_type.split("_")[0]
+
+    if (apps_type === "alicloud_oa") apps_subs = "alicloud2"
     let post_urls = "/" + apps_subs + base_urls + apps_uuid
         + "&client_key=" + apps_keys + "&apps_types=" + apps_type
         + "&server_use=" + server_use
@@ -84,9 +91,34 @@ async function getLogin(refresh = false) {
         // 申请登录模式 ================================================================
         if (response.status === 200) {
             if (apps_subs === "onedrive" || apps_subs === "115cloud"
-                || apps_subs === "baiduyun" || apps_subs === "googleui" || apps_subs === "yandex") {
+                || apps_subs === "googleui" || apps_subs === "yandex"
+                || apps_type === "baiduyun_go"
+            ) {
                 window.location.href = response_data.text;
             }
+            // 百度云OOB模式（手动回调） ===============================================
+            if (apps_type === "baiduyun_ob") {
+                window.open(response_data.text);
+                await Swal.fire({
+                    title: '提示',
+                    html: '请在新打开的页面获取授权码并粘贴到下方：' +
+                        '<input id="authCodeInput" type="text"' +
+                        'style="margin-top: 10px; width: calc(100% - 20px);">',
+                    confirmButtonText: 'OK',
+                    preConfirm: () => {
+                        return document.getElementById('authCodeInput').value;
+                    }
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const authCode = result.value;
+                        console.log('授权码:', authCode);
+                        window.location.href = "/baiduyun/callback" +
+                            "?server_oob=true" + "&secret_key=" + secret_key +
+                            "&client_key=" + apps_keys + "&code=" + authCode;
+                    }
+                });
+            }
+            // 123网盘直接获取 ===========================================================
             if (apps_subs === "123cloud") {
                 document.getElementById("access-token").value = response_data.text;
                 return;

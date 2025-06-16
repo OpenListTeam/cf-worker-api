@@ -16,14 +16,17 @@ export async function oneLogin(c: Context) {
     const secret_key: string = <string>c.req.query('secret_key');
     const driver_txt: string = <string>c.req.query('apps_types');
     const server_use: string = <string>c.req.query('server_use');
-    if (server_use == "false" && (!driver_txt || !client_key || !secret_key))
-        return c.json({text: "参数缺少"}, 500);
+    const redirector: string = 'https://' + c.env.MAIN_URLS + '/baiduyun/callback'
+    console.log(driver_txt, client_key, secret_key)
+    if (server_use == "false")
+        if (!driver_txt || !client_key || !secret_key)
+            return c.json({text: "参数缺少"}, 500);
     // 请求参数 ==========================================================================
     const params_all: Record<string, any> = {
         client_id: server_use == "true" ? c.env.baiduyun_key : client_key,
         scope: "basic,netdisk",
         response_type: 'code',
-        redirect_uri: 'https://' + c.env.MAIN_URLS + '/baiduyun/callback'
+        redirect_uri: driver_txt === "baiduyun_ob" ? "oob" : redirector
     };
     const urlWithParams = new URL(driver_map[0]);
     Object.keys(params_all).forEach(key => {
@@ -49,27 +52,31 @@ export async function oneLogin(c: Context) {
 
 // 令牌申请 ##############################################################################
 export async function oneToken(c: Context) {
-    let login_data, client_key, secret_key, client_url;
+    let login_data, client_key, secret_key, client_url, server_oob;
     let driver_txt, server_use, params_all: Record<string, any>;
+    const redirector: string = 'https://' + c.env.MAIN_URLS + '/baiduyun/callback'
     try { // 请求参数 ====================================================================
+        server_oob = c.req.query('server_oob');
         login_data = c.req.query('code');
+        client_key = secret_key = ""
         server_use = local.getCookie(c, 'server_use')
         driver_txt = local.getCookie(c, 'driver_txt')
-        client_key = secret_key = ""
-        if (server_use == "false") {
+        if (server_oob && server_oob == "true") {
+            client_key = c.req.query('client_key');
+            secret_key = c.req.query('secret_key');
+            server_use = "false"
+        } else if (server_use == "false") {
             client_key = local.getCookie(c, 'client_key')
             secret_key = local.getCookie(c, 'secret_key')
             if (!login_data || !client_key || !secret_key)
                 return c.redirect(showErr("Cookie缺少", "", ""));
         }
-
         client_url = driver_map[1];
         params_all = {
             client_id: server_use == "true" ? c.env.baiduyun_key : client_key,
             client_secret: server_use == "true" ? c.env.baiduyun_ext : secret_key,
-            code: login_data,
-            grant_type: 'authorization_code',
-            redirect_uri: 'https://' + c.env.MAIN_URLS + '/baiduyun/callback'
+            code: login_data, grant_type: 'authorization_code',
+            redirect_uri: server_oob && server_oob == "true" ? "oob" : redirector
         };
     } catch (error) {
         return c.redirect(showErr(<string>error, "", ""));

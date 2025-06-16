@@ -1,5 +1,7 @@
 import {Context} from "hono";
 import * as local from "hono/cookie";
+import * as configs from "./shares/configs";
+import * as refresh from "./shares/refresh";
 
 // 阿里云盘扫码登录相关接口定义
 interface QRCodeData {
@@ -693,5 +695,14 @@ export async function logout(c: Context) {
 
 // 刷新令牌 ##############################################################################
 export async function genToken(c: Context) {
-    return c.json({text: "此网盘不支持"}, 500);
+    const refresh_text: string | undefined = c.req.query('refresh_ui');
+    if (!refresh_text) return c.json({text: "缺少刷新令牌"}, 500);
+    // 请求参数 ==========================================================================
+    const params: Record<string, any> = {
+        grant_type: 'refresh_token',
+        refresh_token: refresh_text
+    };
+    const post_url = "https://openapi.aliyundrive.com/oauth/access_token"
+    return await refresh.genToken(c, post_url, params, "POST",
+        "access_token", "refresh_token", "message");
 }

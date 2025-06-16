@@ -1,6 +1,9 @@
 import {Context} from "hono";
 import {showErr} from "./error";
 import * as local from "hono/cookie";
+import * as refresh from "./shares/refresh"
+import * as configs from "./shares/configs"
+
 interface Token {
     token_type?: string;
     access_token?: string;
@@ -13,14 +16,18 @@ interface Token {
 
 export async function yandexLogin(c: Context) {
     const env = c.env
-    const client_uid: string = <string>c.req.query('client_uid');
-    const client_key: string = <string>c.req.query('client_key');
-    const server_use: string = <string>c.req.query('server_use');
-    if (server_use == "false" && (!client_uid || !client_key))
+    let client_uid: string | undefined = c.req.query('client_uid');
+    let client_key: string | undefined = c.req.query('client_key');
+    let server_use: string | undefined = c.req.query('server_use');
+    if (!server_use)
         return c.json({text: "参数缺少"}, 500);
+    if (!client_uid || !client_key)
+        if (server_use == "false")
+            return c.json({text: "参数缺少"}, 500);
+    client_uid = client_key = ""
     const params_all: Record<string, any> = {
         response_type: 'code',
-        client_id: server_use == "true" ? env.YANDEX_CLIENT_ID : client_uid,
+        client_id: server_use == "true" ? env.yandexui_uid : client_uid,
     };
     if (server_use == "false") {
         local.setCookie(c, 'client_uid', client_uid);
@@ -40,16 +47,21 @@ export async function yandexLogin(c: Context) {
 
 
 export async function yandexCallBack(c: Context) {
+    let client_uid, client_key;
     const env = c.env;
     const code = <string>c.req.query("code");
     const error = <string>c.req.query("error");
+    const server_use = local.getCookie(c, 'server_use')
+    if (server_use && server_use == "true") {
+        client_uid = local.getCookie(c, 'client_uid')
+        client_key = local.getCookie(c, 'client_key')
+    }
     const error_description = <string>c.req.query("error_description");
-
     const getToken = async (): Promise<Token> => {
         const params = new URLSearchParams();
         params.append("grant_type", "authorization_code");
-        params.append("client_id", env.YANDEX_CLIENT_ID);
-        params.append("client_secret", env.YANDEX_CLIENT_SECRET);
+        params.append("client_id", server_use == "true" ? env.yandexui_uid : env.client_uid);
+        params.append("client_secret", server_use == "true" ? env.yandexui_key : env.client_key);
         params.append("code", code);
 
         const resp = await fetch("https://oauth.yandex.com/token", {
@@ -102,5 +114,17 @@ export async function yandexCallBack(c: Context) {
 
 // 刷新令牌 ##############################################################################
 export async function genToken(c: Context) {
-    return c.json({text: "此网盘不支持"}, 500);
+    const clients_info: configs.Clients | undefined = configs.getInfo(c);
+    const refresh_text: string | undefined = c.req.query('refresh_ui');
+    if (!clients_info) return c.json({text: "传入参数缺少"}, 500);
+    if (!refresh_text) return c.json({text: "缺少刷新令牌"}, 500);
+    // 请求参数 ==========================================================================
+    const params: Record<string, any> = {
+        grant_type: "refresh_token",
+        refresh_token: refresh_text,
+        client_id: clients_info.servers ? c.env.alicloud_uid : clients_info.app_uid,
+        client_secret: clients_info.servers ? c.env.alicloud_key : clients_info.app_key,
+    };
+    return await refresh.genToken(c, "https://oauth.yandex.com/token", params, "POST",
+        "data.access_token", "data.refresh_token", "error");
 }

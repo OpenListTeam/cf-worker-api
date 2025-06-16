@@ -18,7 +18,9 @@
     "115cloud_uid": "",
     "115cloud_key": "",
     "googleui_uid": "",
-    "googleui_key": ""
+    "googleui_key": "",
+    "yandexui_uid": "",
+    "yandexui_key": ""
   },
   "site": {
     "bucket": "./public"

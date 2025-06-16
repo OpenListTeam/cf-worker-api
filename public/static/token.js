@@ -74,11 +74,31 @@ async function getToken() {
             document.getElementById('sharepoint-btn-view').hidden = true;
             document.getElementById('sharepoint-uid-view').hidden = true;
         }
-        if (siteSelect.value === "baiduyun_go") {
+        if (siteSelect.value.split("_")[0] === "baiduyun") {
             document.getElementById('secret-key-view').hidden = false;
             document.getElementById('client-id-view').hidden = true;
+            if (siteSelect.value == "baiduyun_ob") {
+                document.getElementById("app-secret").value = "NqOMXF6XGhGRIGemsQ9nG0Na";
+                document.getElementById("secret-key").value = "SVT6xpMdLcx6v4aCR4wT8BBOTbzFO8LM";
+                document.getElementById("callback-url").value = "oob";
+            }
         } else {
             document.getElementById('client-id-view').hidden = false;
+            document.getElementById("app-secret").value = "";
+            document.getElementById("secret-key").value = "";
+            document.getElementById("client-id").value = "";
+        }
+        if (siteSelect.value == "baiduyun_ob" ||
+            siteSelect.value == "123cloud_go" ||
+            // siteSelect.value == "onedrive_go" ||
+            siteSelect.value == "onedrive_cn" ||
+            siteSelect.value == "onedrive_us" ||
+            siteSelect.value == "onedrive_de" ||
+            siteSelect.value == "alicloud_oa" ||
+            siteSelect.value == "alicloud_qr"
+        ) {
+            document.getElementById("server_use").checked = false;
+            document.getElementById("server_use").disabled = true;
         }
 
     });

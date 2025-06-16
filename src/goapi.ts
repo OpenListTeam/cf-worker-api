@@ -56,6 +56,7 @@ export async function oneToken(c: Context) {
         random_uid = <string>c.req.query('state');
         server_use = local.getCookie(c, 'server_use')
         driver_txt = <string>local.getCookie(c, 'driver_txt')
+        random_key = <string>local.getCookie(c, 'random_key')
         client_uid = client_key = ""
         if (server_use == "false") {
             client_uid = <string>local.getCookie(c, 'client_uid')
@@ -63,10 +64,8 @@ export async function oneToken(c: Context) {
             if (!client_uid || !client_key || random_uid !== random_key || !client_uid || !client_key)
                 return c.redirect(showErr("Cookie无效", "", ""));
         }
-        random_key = <string>local.getCookie(c, 'random_key')
         driver_txt = local.getCookie(c, 'driver_txt')
         // console.log(login_data, random_uid, client_uid, client_key, random_key, driver_txt)
-
         params_all = {
             'client_id': server_use == "true" ? c.env.googleui_uid : client_uid,
             'client_secret': server_use == "true" ? c.env.googleui_key : client_key,
