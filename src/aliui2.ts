@@ -303,8 +303,8 @@ class AlipanQRLogin {
     // 获取访问令牌
     async getAccessToken(bizExt: any): Promise<string | null> {
         try {
-            console.log('getAccessToken - bizExt type:', typeof bizExt);
-            console.log('getAccessToken - bizExt:', bizExt);
+            // console.log('getAccessToken - bizExt type:', typeof bizExt);
+            // console.log('getAccessToken - bizExt:', bizExt);
             
             // bizExt 是 Base64 编码的字符串，需要先解码
             let decodedBizExt: any;
@@ -312,7 +312,7 @@ class AlipanQRLogin {
                 try {
                     const decodedString = atob(bizExt);
                     decodedBizExt = JSON.parse(decodedString);
-                    console.log('getAccessToken - decoded bizExt:', JSON.stringify(decodedBizExt, null, 2));
+                    // console.log('getAccessToken - decoded bizExt:', JSON.stringify(decodedBizExt, null, 2));
                 } catch (decodeError) {
                     console.error('解码 bizExt 失败:', decodeError);
                     return null;
@@ -322,16 +322,16 @@ class AlipanQRLogin {
             }
             
             if (!decodedBizExt || !decodedBizExt.pds_login_result) {
-                console.log('getAccessToken - No pds_login_result found in decoded data');
+                // console.log('getAccessToken - No pds_login_result found in decoded data');
                 return null;
             }
 
             const loginResult = decodedBizExt.pds_login_result;
-            console.log('getAccessToken - loginResult:', JSON.stringify(loginResult, null, 2));
+            // console.log('getAccessToken - loginResult:', JSON.stringify(loginResult, null, 2));
             this.access_token = loginResult.accessToken;
             this.refresh_token = loginResult.refreshToken;
-            console.log('getAccessToken - access_token set:', this.access_token ? 'success' : 'failed');
-            console.log('getAccessToken - refresh_token set:', this.refresh_token ? 'success' : 'failed');
+            // console.log('getAccessToken - access_token set:', this.access_token ? 'success' : 'failed');
+            // console.log('getAccessToken - refresh_token set:', this.refresh_token ? 'success' : 'failed');
             return this.access_token;
         } catch (error) {
             console.error('获取访问令牌失败:', error);
@@ -441,7 +441,7 @@ function cleanupExpiredSessions() {
     for (const [sessionId, sessionData] of loginSessions.entries()) {
         if (now - sessionData.lastAccess > SESSION_TIMEOUT) {
             loginSessions.delete(sessionId);
-            console.log(`清理过期会话: ${sessionId}`);
+            // console.log(`清理过期会话: ${sessionId}`);
         }
     }
 }
@@ -459,7 +459,7 @@ function getOrCreateSession(sessionId?: string, clientFingerprint?: string): { s
         // 检查会话是否过期
         if (now - sessionData.lastAccess > SESSION_TIMEOUT) {
             loginSessions.delete(sessionId);
-            console.log(`会话已过期，删除: ${sessionId}`);
+            // console.log(`会话已过期，删除: ${sessionId}`);
         } else {
             // 更新最后访问时间
             sessionData.lastAccess = now;
@@ -477,8 +477,8 @@ function getOrCreateSession(sessionId?: string, clientFingerprint?: string): { s
     };
     
     loginSessions.set(newSessionId, newSessionData);
-    console.log(`创建新会话: ${newSessionId}, 客户端指纹: ${clientFingerprint || 'none'}`);
-    
+    // console.log(`创建新会话: ${newSessionId}, 客户端指纹: ${clientFingerprint || 'none'}`);
+
     return { sessionId: newSessionId, sessionData: newSessionData };
 }
 
@@ -526,7 +526,7 @@ export async function generateQR(c: Context) {
             return c.json({error: '生成二维码失败，可能是网络问题或API变化，请稍后重试'}, 500);
         }
 
-        console.log(`会话 ${sessionId} 生成二维码成功`);
+        // console.log(`会话 ${sessionId} 生成二维码成功`);
 
         return c.json({
             success: true,
@@ -578,7 +578,7 @@ export async function checkLogin(c: Context) {
         // 如果登录成功，获取访问令牌
         if (status === 'CONFIRMED') {
             const accessToken = await alipan.getAccessToken(statusResult.content.bizExt);
-            console.log(`会话 ${sessionId} - 登录确认，token获取: ${accessToken ? '成功' : '失败'}`);
+            // console.log(`会话 ${sessionId} - 登录确认，token获取: ${accessToken ? '成功' : '失败'}`);
             if (accessToken) {
                 return c.json({
                     success: true,
@@ -635,7 +635,7 @@ export async function getUserInfo(c: Context) {
         const alipan = sessionData.instance;
 
         // 检查是否已经登录成功
-        console.log(`会话 ${sessionId} - 登录状态: ${alipan.isLoggedIn()}, token: ${alipan.getToken() ? '存在' : '不存在'}`);
+        // console.log(`会话 ${sessionId} - 登录状态: ${alipan.isLoggedIn()}, token: ${alipan.getToken() ? '存在' : '不存在'}`);
         if (!alipan.isLoggedIn()) {
             return c.json({error: '用户尚未登录成功，请先完成扫码登录'}, 400);
         }
@@ -680,7 +680,7 @@ export async function logout(c: Context) {
 
         // 删除会话
         const deleted = loginSessions.delete(sessionId);
-        console.log(`会话 ${sessionId} 退出登录: ${deleted ? '成功' : '会话不存在'}`);
+        // console.log(`会话 ${sessionId} 退出登录: ${deleted ? '成功' : '会话不存在'}`);
 
         return c.json({
             success: true,

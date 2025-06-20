@@ -55,7 +55,6 @@ export async function alyLogin(c: Context) {
         local.setCookie(c, 'driver_txt', driver_txt);
         local.setCookie(c, 'server_use', server_use);
         const data: Record<string, any> = await response.json();
-        console.log(data);
         return c.json({
             "text": data.qrCodeUrl,
             "sid": data.sid
@@ -106,7 +105,6 @@ export async function alyToken(c: Context) {
             return c.json({text: `${error.code}: ${error.message}`,}, 403);
         }
         const data: Record<string, any> = await response.json();
-        console.log(data);
         return c.json(data);
     } catch (error) {
         return c.json({text: error}, 500

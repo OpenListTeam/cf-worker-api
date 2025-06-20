@@ -53,16 +53,18 @@
 
 - #### 返回内容
 
-如果执行无误，回返回url
+如果执行无误，会返回经Base64编码的JSON数据。
 
-| 参数名称          | 类型  | 必要 | 示例                             | 说明               |
-| ----------------- | ----- | ---- | -------------------------------- | ------------------ |
-| `<url 302重定向>` | `302` | 否   | `/?......`                       | 返回登录链接到前端 |
-| `access_token`    | `str` | 否   | VqKbrWpetI3HnvyvsWquv9BJFL3j4xjc | 返回访问令牌到前端 |
-| `refresh_token`   | `str` | 否   | oMMPXrCCrRwMoqVD321Z03PSoxmsAKjI | 返回刷新令牌到前端 |
-| `client_uid`      | `str` | 否   | b2eaau943b1bx464                 | 用户传入的客户端ID |
-| `client_key`      | `str` | 否   | SHcAplYIY679BEVF9FveGKtLuSI6MikU | 用户传入的应用密钥 |
-| `driver_txt`      | `str` | 否   | onedrive                         | 用户传入的驱动类型 |
+| 参数名称          | 类型  | 必要 | 示例                             | 说明                         |
+| ----------------- | ----- | ---- |----------------------------------| ---------------------------- |
+| `<url 302重定向>` | `302` | 否   | `/#eyJhY2Nlc3Nf......`           | 返回编码的数据到前端         |
+| `access_token`    | `str` | 否   | VqKbrWpetI3HnvyvsWquv9BJFL3j4xjc | 返回访问令牌到前端           |
+| `refresh_token`   | `str` | 否   | oMMPXrCCrRwMoqVD321Z03PSoxmsAKjI | 返回刷新令牌到前端           |
+| `server_use`      | `str` | 否   | true                             | 是否使用 OpenList 提供的参数 |
+| `client_uid`      | `str` | 否   | b2eaau943b1bx464                 | 用户传入的客户端ID           |
+| `client_key`      | `str` | 否   | SHcAplYIY679BEVF9FveGKtLuSI6MikU | 用户传入的应用密钥           |
+| `driver_txt`      | `str` | 否   | onedrive                         | 用户传入的驱动类型           |
+| `message_err`     | `str` | 否   | Connection reset by peer         | 服务端错误信息               |
 
 ### 刷新令牌
 
@@ -83,7 +85,7 @@
 
 - #### 返回内容
 
-如果执行无误，回返回url
+如果执行无误，会返回url。
 
 | 参数名称        | 类型  | 必要 | 示例            | 说明               |
 | --------------- | ----- | ---- | --------------- | ------------------ |

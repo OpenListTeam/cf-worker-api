@@ -1,23 +1,48 @@
 async function getToken() {
-    const strSearch = window.location.search;
-    const urlParams = new URLSearchParams(strSearch);
-    const server_use = urlParams.get("server_use");
-    const client_uid = urlParams.get("client_uid");
-    const secret_key = urlParams.get("secret_key");
-    const driver_txt = urlParams.get("driver_txt");
-    const client_key = urlParams.get("client_key");
-    const access_token = urlParams.get("access_token");
-    const refresh_token = urlParams.get("refresh_token");
-    const message_err = urlParams.get("message_err");
-    document.getElementById("site-select").value = driver_txt;
-    if (!driver_txt || driver_txt === "")
-        document.getElementById("site-select").value = "onedrive_go";
-    document.getElementById("app-secret").value = client_key;
-    document.getElementById("client-id").value = client_uid;
-    document.getElementById("access-token").value = access_token;
-    document.getElementById("refresh-token").value = refresh_token;
-    if (secret_key)
-        document.getElementById("secret-key").value = secret_key;
+    const hash = window.location.hash.substring(1); // 去掉#号Add commentMore actions
+    let message_err = "";
+    if (hash) {
+        try {
+            const jsonBytes = Uint8Array.from(atob(hash), c => c.charCodeAt(0));
+            const json = new TextDecoder().decode(jsonBytes);
+            const callbackData = JSON.parse(json);
+            const server_use = callbackData.server_use;
+            const client_uid = callbackData.client_uid;
+            const secret_key = callbackData.secret_key;
+            const driver_txt = callbackData.driver_txt;
+            const client_key = callbackData.client_key;
+            const access_token = callbackData.access_token;
+            const refresh_token = callbackData.refresh_token;
+
+            // 从历史记录清除#号部分，避免隐私信息泄漏
+            // 这只会在正常解析JSON后执行，其他的hash不会被清除
+            // window.history.replaceState(null, null, window.location.pathname + window.location.search);
+            // 在Chrome 136测试发现，通过History API操作，不但不会修改记录反而还会多出一条记录。
+            // Chrome浏览器可以使用location.replace修改记录，Firefox浏览器上此方法无效。
+            // 参见：https://stackoverflow.com/questions/61711130/removing-sensitive-url-data-from-borwser-history
+            window.location.replace('#');
+
+            if (server_use == "true") {
+                document.getElementById("server_use").checked = true;
+            }
+            message_err = callbackData.message_err;
+
+            document.getElementById("site-select").value = driver_txt;
+            if (!driver_txt || driver_txt === "") {
+                document.getElementById("site-select").value = "onedrive_go";
+            }
+            document.getElementById("app-secret").value = client_key;
+            document.getElementById("client-id").value = client_uid;
+            document.getElementById("access-token").value = access_token;
+            document.getElementById("refresh-token").value = refresh_token;
+            if (secret_key) {
+                document.getElementById("secret-key").value = secret_key;
+            }
+        } catch (e) {
+            // hash不是JSON，可能是HTML内的锚点
+        }
+    }
+
     // 获取select元素和输入框元素
     const siteSelect = document.getElementById('site-select');
     const callbackUrlInput = document.getElementById('callback-url');

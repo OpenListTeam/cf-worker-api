@@ -3,6 +3,7 @@ import {Context} from "hono";
 import {showErr} from "./error";
 import * as configs from "./shares/configs";
 import * as refresh from "./shares/refresh";
+import {encodeCallbackData} from "./shares/callback-data";
 
 const driver_map: string[] = [
     "https://accounts.google.com/o/oauth2/v2/auth",
@@ -65,7 +66,7 @@ export async function oneToken(c: Context) {
                 return c.redirect(showErr("Cookie无效", "", ""));
         }
         driver_txt = local.getCookie(c, 'driver_txt')
-        // console.log(login_data, random_uid, client_uid, client_key, random_key, driver_txt)
+
         params_all = {
             'client_id': server_use == "true" ? c.env.googleui_uid : client_uid,
             'client_secret': server_use == "true" ? c.env.googleui_key : client_key,
@@ -76,7 +77,13 @@ export async function oneToken(c: Context) {
     } catch (error) {
         return c.redirect(showErr(<string>error, "", ""));
     }
-    console.log(params_all);
+
+    // 避免key泄漏
+    if (server_use == "true") {
+        client_uid = "";
+        client_key = "";
+    }
+
     // 执行请求 ===========================================================================
     try {
         const paramsString = new URLSearchParams(params_all).toString();
@@ -92,15 +99,16 @@ export async function oneToken(c: Context) {
         local.deleteCookie(c, 'driver_txt');
         local.deleteCookie(c, 'server_use');
         let json: Record<string, any> = await response.json();
-        console.log(json);
         if (json.token_type == "Bearer") {
-            return c.redirect(
-                `/?access_token=${json.access_token}`
-                + `&refresh_token=${json.refresh_token}`
-                + `&client_uid=${server_use == "true" ? "" : client_uid}`
-                + `&client_key=${server_use == "true" ? "" : client_key}`
-                + `&driver_txt=${driver_txt}`
-            );
+            const callbackData: CallbackData = {
+                access_token: json.access_token,
+                refresh_token: json.refresh_token,
+                client_uid: client_uid,
+                client_key: client_key,
+                driver_txt: driver_txt,
+                server_use: server_use,
+            };
+            return c.redirect("/#" + encodeCallbackData(callbackData));
         }
         return c.redirect(showErr(json.message, client_uid, client_key));
     } catch (error) {

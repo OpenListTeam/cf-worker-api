@@ -3,6 +3,7 @@ import {Context} from "hono";
 import {showErr} from "./error";
 import * as configs from "./shares/configs";
 import * as refresh from "./shares/refresh";
+import {encodeCallbackData} from "./shares/callback-data";
 
 const driver_map: Record<string, string[]> = {
     "onedrive_pr": [
@@ -90,7 +91,12 @@ export async function oneToken(c: Context) {
     } catch (error) {
         return c.redirect(showErr("参数错误", "", ""));
     }
-    // console.log(login_data);
+
+    // 避免key泄漏
+    if (server_use == "true") {
+        client_uid = "";
+        client_key = "";
+    }
 
     // 执行请求 ===========================================================================
     try {
@@ -102,7 +108,6 @@ export async function oneToken(c: Context) {
             },
             body: paramsString,
         });
-        // console.log(response);
         if (server_use == "false") {
             local.deleteCookie(c, 'client_uid');
             local.deleteCookie(c, 'client_key');
@@ -113,13 +118,15 @@ export async function oneToken(c: Context) {
             return c.redirect(showErr("请求失败", client_uid, client_key));
         const json: Record<string, any> = await response.json();
         if (json.token_type === 'Bearer') {
-            return c.redirect(
-                `/?access_token=${json.access_token}`
-                + `&refresh_token=${json.refresh_token}`
-                + `&client_uid=${server_use == "true" ? "" : client_uid}`
-                + `&client_key=${server_use == "true" ? "" : client_key}`
-                + `&driver_txt=${driver_txt}`
-            );
+            const callbackData: CallbackData = {
+                access_token: json.access_token,
+                refresh_token: json.refresh_token,
+                client_uid: client_uid,
+                client_key: client_key,
+                driver_txt: driver_txt,
+                server_use: server_use,
+            }
+            return c.redirect("/#" + encodeCallbackData(callbackData));
         }
     } catch (error) {
         return c.redirect(showErr(<string>error, client_uid, client_key));
@@ -145,7 +152,6 @@ export async function spSiteID(c: Context) {
             return c.json({error: 'Failed to fetch site ID'}, 403);
         }
         const data: Record<string, any> = await response.json();
-        console.log(data);
         return c.json(data);
     } else {
         return c.json({error: 'Zone does not exist'}, 400);

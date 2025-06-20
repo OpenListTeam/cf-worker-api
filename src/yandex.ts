@@ -3,6 +3,7 @@ import {showErr} from "./error";
 import * as local from "hono/cookie";
 import * as refresh from "./shares/refresh"
 import * as configs from "./shares/configs"
+import {encodeCallbackData} from "./shares/callback-data";
 
 interface Token {
     token_type?: string;
@@ -86,7 +87,6 @@ export async function yandexCallBack(c: Context) {
 
     try {
         const token: Token = await getToken();
-        console.log("Yandex token response:", token);
         if (!token.error && token.access_token) {
             const server_use = local.getCookie(c, 'server_use');
             const client_uid = local.getCookie(c, 'client_uid');
@@ -96,13 +96,15 @@ export async function yandexCallBack(c: Context) {
             local.deleteCookie(c, 'client_uid');
             local.deleteCookie(c, 'client_key');
 
-            return c.redirect(
-                `/?access_token=${token.access_token}`
-                + `&refresh_token=${token.refresh_token}`
-                + `&client_uid=${server_use == "true" ? "" : client_uid || ""}`
-                + `&client_key=${server_use == "true" ? "" : client_key || ""}`
-                + `&driver_txt=yandexui_go`
-            );
+            const callbackData: CallbackData = {
+                access_token: token.access_token,
+                refresh_token: token.refresh_token,
+                client_uid: client_uid,
+                client_key: client_key,
+                driver_txt: "yandexui_go",
+                server_use: server_use,
+            }
+            return c.redirect("/#" + encodeCallbackData(callbackData));
         } else {
             return c.redirect(showErr(token.error_description || token.error || "Token request failed", "", ""));
         }

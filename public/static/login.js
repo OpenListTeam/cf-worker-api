@@ -7,7 +7,6 @@ async function getLogin(refresh = false) {
     let driver_txt = document.getElementById("site-select").value;
     let refresh_ui = document.getElementById("refresh-token").value;
     let driver_pre = driver_txt.split("_")[0]
-    console.log(server_use);
     let check_flag = true;
     // 验证秘钥情况 ==================================================
     if (!server_use) {
@@ -109,7 +108,6 @@ async function getLogin(refresh = false) {
                 }).then(async (result) => {
                     if (result.isConfirmed) {
                         const authCode = result.value;
-                        console.log('授权码:', authCode);
                         window.location.href = "/baiduyun/callback" +
                             "?server_oob=true" + "&secret_key=" + secret_key +
                             "&client_key=" + client_key + "&code=" + authCode;
@@ -139,10 +137,14 @@ async function getLogin(refresh = false) {
                 let auth_post = await fetch(post_urls, {method: 'GET'});
                 let auth_data = await auth_post.json();
                 if (auth_post.status === 200) {
-                    window.location.href = `/?access_token=${auth_data.access_token}`
-                        + `&refresh_token=${auth_data.refresh_token}`
-                        + `&client_uid=${client_uid}`
-                        + `&client_key=${client_key}`;
+                    const callbackData = {
+                        access_token: auth_data.access_token,
+                        refresh_token: auth_data.refresh_token,
+                        client_uid: client_uid,
+                        client_key: client_key
+                    };
+                    window.location.hash = "#" + encodeCallbackData(callbackData);
+                    getToken();
                 }
             }
 
@@ -160,4 +162,8 @@ async function getLogin(refresh = false) {
             timer: 1000
         });
     }
+}
+
+function encodeCallbackData(data) {
+    return btoa(JSON.stringify(data))
 }
