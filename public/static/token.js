@@ -67,11 +67,15 @@ async function getToken() {
         }
         if (siteSelect.value.split("_")[0] === "onedrive") {
             document.getElementById('sharepoint-url-view').hidden = false;
-            document.getElementById('sharepoint-btn-view').hidden = false;
+            const sharepointBtn = document.getElementById('sharepoint-btn-view');
+            sharepointBtn.classList.add('d-grid');
+            sharepointBtn.hidden = false;
             document.getElementById('sharepoint-uid-view').hidden = false;
         } else {
             document.getElementById('sharepoint-url-view').hidden = true;
-            document.getElementById('sharepoint-btn-view').hidden = true;
+            const sharepointBtn = document.getElementById('sharepoint-btn-view');
+            sharepointBtn.hidden = true;
+            sharepointBtn.classList.remove('d-grid');
             document.getElementById('sharepoint-uid-view').hidden = true;
         }
         if (siteSelect.value.split("_")[0] === "baiduyun") {
