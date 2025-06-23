@@ -22,7 +22,9 @@ function addEventListener() {
 
 function onChange(clean = true) {
     const selectedValue = this.value.split("_")[0]; // 获取选中的value
-    const urls = `https://api.oplist.org/${selectedValue}/callback`
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    const urls = `${protocol}//${host}/${selectedValue}/callback`
     // 更新输入框的值 ======================================================
     direct_url_input.value = urls;
     server_use_input.checked = false;
@@ -50,12 +52,12 @@ function onSelect() {
         clientIdContainer.style.display = 'none';
         appSecretContainer.style.display = 'none';
         serverUseContainer.style.display = 'none';
-        callbackContainer.style.display = 'none';
+        //callbackContainer.style.display = 'none';
     } else {
         clientIdContainer.style.display = 'block';
         appSecretContainer.style.display = 'block';
         serverUseContainer.style.display = 'block';
-        callbackContainer.style.display = 'block';
+        //callbackContainer.style.display = 'block';
     }
     // Onedrive模式需要显示Share Point 相关参数 ===========================
     if (driver_txt_input.value.split("_")[0] === "onedrive") {

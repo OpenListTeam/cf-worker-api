@@ -44,7 +44,7 @@ export async function alyLogin(c: Context) {
     }
     // QR扫码需要增加的参数 =============================================================
     if (clients.drivers == "alicloud_go") {
-        params_info.redirect_uri = 'https://' + c.env.MAIN_URLS + '/alicloud/callback'
+        params_info.redirect_uri = configs.getCallbackUrl(c, '/alicloud/callback')
         params_info.response_type = 'code'
         params_info.scope = ['user:base', 'file:all:read', 'file:all:write']
     } else {
@@ -74,8 +74,8 @@ export async function alyToken(c: Context) {
     if (!clients_info.drivers) return c.json({text: 'No Cookies',}, 401);
     if (!oauth_type) oauth_type = "authorization_code";
     const req: AliAccessTokenReq = {
-        client_id: clients_info.servers  ? c.env.alicloud_uid : <string>c.req.query('client_id'),
-        client_secret: clients_info.servers ? c.env.alicloud_key : <string>c.req.query('client_secret'),
+        client_id: clients_info.app_uid  ? c.env.alicloud_uid : <string>c.req.query('client_id'),
+        client_secret: clients_info.app_key ? c.env.alicloud_key : <string>c.req.query('client_secret'),
         grant_type: <string>oauth_type,
         code: <string>c.req.query('code'),
         refresh_token: <string>c.req.query('refresh_token')

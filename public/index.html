@@ -60,7 +60,7 @@
 
     <div class="mb-3">
         <label for="direct-url-input" class="form-label">回调地址（Callback URL）</label>
-        <input type="text" id="direct-url-input" class="form-control" value="https://api.oplist.org/onedrive/callback"
+        <input type="text" id="direct-url-input" class="form-control"
                readonly onclick="autoCopy(this)">
     </div>
 
@@ -155,9 +155,9 @@
         }
     }
     // // 页面加载时初始化回调地址
-    // window.onload = function () {
-    //     driver_txt_input.dispatchEvent(new Event('change'));
-    // };
+    window.onload = function () {
+        driver_txt_input.dispatchEvent(new Event('change'));
+    };
 </script>
 </body>
 </html>

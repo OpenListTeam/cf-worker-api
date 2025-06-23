@@ -27,7 +27,7 @@ export async function oneLogin(c: Context) {
         client_id: server_use == "true" ? c.env.cloud115_uid : client_uid,
         state: random_key,
         response_type: 'code',
-        redirect_uri: 'https://' + c.env.MAIN_URLS + '/115cloud/callback'
+        redirect_uri: configs.getCallbackUrl(c, '/115cloud/callback')
     };
     const urlWithParams = new URL(driver_map[0]);
     Object.keys(params_all).forEach(key => {
@@ -71,7 +71,7 @@ export async function oneToken(c: Context) {
         params_all = {
             client_id: server_use == "true" ? c.env.cloud115_uid : client_uid,
             client_secret: server_use == "true" ? c.env.cloud115_key : client_key,
-            redirect_uri: 'https://' + c.env.MAIN_URLS + '/115cloud/callback',
+            redirect_uri: configs.getCallbackUrl(c, '/115cloud/callback'),
             code: login_data,
             grant_type: 'authorization_code'
         };
@@ -119,7 +119,7 @@ export async function oneToken(c: Context) {
     }
 }
 
-// 登录申请 ##############################################################################
+// 刷新令牌 ##############################################################################
 export async function genToken(c: Context) {
     const refresh_text: string | undefined = c.req.query('refresh_ui');
     if (!refresh_text) return c.json({text: "缺少刷新令牌"}, 500);
