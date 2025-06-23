@@ -1,4 +1,5 @@
 async function getToken() {
+    const url_hash = window.location.hash ? window.location.hash.substring(1) : '';
     if (url_hash) {
         try {
             const json_byte = Uint8Array.from(atob(url_hash), c => c.charCodeAt(0));
