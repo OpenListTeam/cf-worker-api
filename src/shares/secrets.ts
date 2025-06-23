@@ -16,4 +16,7 @@ export interface Secrets {
     secret_key?: string;
     driver_txt?: string;
     message_err?: string;
+    app_id?: string;
+    sign_key?: string;
+    expires_in?: number;
 }

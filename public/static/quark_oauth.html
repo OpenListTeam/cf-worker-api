@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>夸克网盘授权</title>
+    <link href="https://jsd.oplist.org/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://jsd.oplist.org/npm/sweetalert2@11.22.0/dist/sweetalert2.all.min.js"></script>
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>夸克网盘授权</h2>
+        <div id="loading" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>授权处理中，请稍候...</p>
+        </div>
+        <div id="error" class="alert alert-danger" style="display: none;">
+            授权失败，请重试
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // 从URL中获取nonce参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const nonce = urlParams.get('nonce');
+            
+            if (nonce) {
+                // 跳转到回调处理
+                window.location.href = "/quarkyun/callback?nonce=" + nonce;
+            } else {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>

@@ -13,6 +13,7 @@ import * as goapi from './driver/googleui_oa';
 import * as yandex from './driver/yandexui_oa';
 import * as drops from './driver/dropboxs_oa';
 import {genToken} from "./driver/baiduyun_oa";
+import * as quark from './driver/quark_oa';
 
 export type Bindings = {
     MAIN_URLS: string, baiduyun_ext: string,
@@ -160,6 +161,21 @@ app.get('/yandexui/callback', async (c: Context) => {
 // 令牌刷新 ##############################################################################
 app.get('/yandexui/renewapi', async (c: Context) => {
     return yandex.genToken(c);
+});
+
+// 登录申请 ##############################################################################
+app.get('/quarkyun/requests', async (c) => {
+  return await quark.oneLogin(c);
+});
+
+// 令牌申请 ##############################################################################
+app.get('/quarkyun/callback', async (c) => {
+  return await quark.oneToken(c);
+});
+
+// 令牌刷新 ##############################################################################
+app.get('/quarkyun/renewapi', async (c) => {
+  return await quark.genToken(c);
 });
 
 export default app

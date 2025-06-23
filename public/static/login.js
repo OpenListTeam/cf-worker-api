@@ -96,6 +96,19 @@ async function getLogin(refresh = false) {
             ) {
                 window.location.href = response_data.text;
             }
+            
+            // 夸克网盘（新窗口打开） ===============================================
+            if (driver_pre === "quarkyun") {
+                window.open(response_data.text);
+                Swal.fire({
+                    title: '提示',
+                    text: '请在新打开的页面完成授权',
+                    icon: 'info',
+                    confirmButtonText: '我知道了'
+                });
+                return;
+            }
+            
             // 百度云OOB模式（手动回调） ===============================================
             if (driver_txt === "baiduyun_ob") {
                 window.open(response_data.text);
@@ -160,6 +173,16 @@ async function getLogin(refresh = false) {
                     html: auth_data.text,
                     showConfirmButton: true
                 });
+            }
+            // 夸克网盘回调处理
+            if (driver_txt === "quarkyun_oa") {
+                // 从URL中获取nonce参数
+                const urlParams = new URLSearchParams(window.location.search);
+                const nonce = urlParams.get('nonce');
+                
+                if (nonce) {
+                    window.location.href = "/quarkyun/callback?nonce=" + nonce;
+                }
             }
 
         } else await Swal.fire({

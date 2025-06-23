@@ -39,6 +39,8 @@ function onSelect() {
     client_uid_input.disabled = false;
     client_uid_views.hidden = false;
     secret_key_views.hidden = true;
+    app_id_views.hidden = true;
+    sign_key_views.hidden = true;
     // 修改一些样式 ========================================================
     const clientIdContainer = client_uid_input.closest('.mb-3');
     const appSecretContainer = client_key_input.closest('.mb-3');
@@ -79,6 +81,12 @@ function onSelect() {
             secret_key_input.value = "SVT6xpMdLcx6v4aCR4wT8BBOTbzFO8LM";
             direct_url_input.value = "oob";
         }
+    }
+    // 当驱动使用夸克网盘时，显示app_id和sign_key
+    if (driver_txt_input.value === "quarkyun_oa") {
+        server_use_input.checked = true;
+        app_id_views.hidden = false;
+        sign_key_views.hidden = false;
     }
     // 禁用部分驱动使用官方参数 ===========================================
     if (driver_txt_input.value === "baiduyun_ob" ||

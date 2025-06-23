@@ -30,6 +30,7 @@
             <option value="alicloud_cs">阿里云盘 (Client) 直接登录</option>
             <option value="baiduyun_go">百度网盘 (OAuth2) 验证登录</option>
             <option value="baiduyun_ob">百度网盘 (OAuth2) 手动登录</option>
+            <option value="quarkyun_oa">夸克网盘 (OAuth2) 验证登录</option>
             <option value="115cloud_go">115 网盘 (OAuth2) 跳转登录</option>
             <option value="123cloud_go">123 网盘 (OAuth2) 跳转登录</option>
             <option value="dropboxs_go">Drop Box (OAuth2) 跳转登录</option>
@@ -80,6 +81,15 @@
     <div class="mb-3">
         <label for="refresh-token" class="form-label">刷新令牌（Refresh Token）</label>
         <textarea id="refresh-token" class="form-control" rows="3" readonly onclick="autoCopy(this)"></textarea>
+    </div>
+    <div class="mb-3" id="app-id-view">
+        <label for="app-id" class="form-label">应用ID（App ID）</label>
+        <textarea id="app-id" class="form-control" rows="2" readonly onclick="autoCopy(this)"></textarea>
+    </div>
+
+    <div class="mb-3" id="sign-key-view">
+        <label for="sign-key" class="form-label">签名密钥（Sign Key）</label>
+        <textarea id="sign-key" class="form-control" rows="2" readonly onclick="autoCopy(this)"></textarea>
     </div>
     <div class="mb-3" id="sharepoint-url-view">
         <label for="sharepoint-url" class="form-label">SharePoint Site URL</label>
@@ -140,6 +150,8 @@
     const shared_url_views = document.getElementById('sharepoint-url-view')
     const shared_btn_views = document.getElementById('sharepoint-btn-view');
     const shared_uid_views = document.getElementById('sharepoint-uid-view');
+    const app_id_views = document.getElementById('app-id-view');
+    const sign_key_views = document.getElementById('sign-key-view');
     const url_hash = window.location.hash.substring(1); // 去掉地址栏上的#号
     getToken();
     // 阿里云盘扫码v2相关变量

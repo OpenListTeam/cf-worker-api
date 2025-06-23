@@ -12,6 +12,8 @@ async function getToken() {
             const access_key = json_data.access_token;
             const refresh_ui = json_data.refresh_token;
             const message_ui = json_data.message_err;
+            const app_id = json_data.app_id;  // 获取 app_id
+            const sign_key = json_data.sign_key;  // 获取 sign_key
             // 从历史记录清除#号部分，避免隐私信息泄漏
             // 这只会在正常解析JSON后执行，其他的hash不会被清除
             // window.history.replaceState(null, null, window.location.pathname + window.location.search);
@@ -46,6 +48,17 @@ async function getToken() {
                     showConfirmButton: true,
                 });
             }
+            // 设置夸克网盘特有字段的值
+            if (app_id && app_id !=="undefined") {
+                document.getElementById("app-id").value = app_id;
+            }
+            if (sign_key && sign_key !== "undefined") {
+                document.getElementById("sign-key").value = sign_key;
+            }
+            
+        
+            // 触发站点选择变化事件以更新UI
+            document.getElementById('site-select').dispatchEvent(new Event('change'));
         } catch (e) {
             console.error(e);
         }
