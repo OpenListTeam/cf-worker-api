@@ -97,15 +97,20 @@
 | 网盘驱动 | 区域类型 | driver   | apps_types  | client_uid | client_key    | secret_key |
 | -------- | -------- | -------- | ----------- | ---------- | ------------- | ---------- |
 | Onedrive | 企业版本 | onedrive | onedrive_go | 客户端ID   | 客户端秘钥    | /          |
+| Onedrive | 个人账号 | onedrive | onedrive_pr | 客户端ID   | 客户端秘钥    | /          |
 | Onedrive | 世纪互联 | onedrive | onedrive_cn | 客户端ID   | 客户端秘钥    | /          |
 | Onedrive | 美国版本 | onedrive | onedrive_us | 客户端ID   | 客户端秘钥    | /          |
 | Onedrive | 德国版本 | onedrive | onedrive_de | 客户端ID   | 客户端秘钥    | /          |
 | 阿里云盘 | 扫码登录 | alicloud | alicloud_qr | APP ID     | App Secret    | /          |
-| 百度云盘 | 验证登录 | baiduyun | baiduyun_go | AppID      | AppKey        | SecretKey  |
-| 115 云盘 | 验证登录 | 115cloud | 115cloud_go | AppID      | AppSecret     | /          |
-| 123 云盘 | 验证登录 | 123cloud | 123cloud_go | client_id  | client_secret | /          |
-| 谷歌云盘 | 验证登录 | googleui | googleui_go | 客户端ID   | 客户端秘钥    | /          |
-| Yandex   | 验证登录 | yandexui | yandexui_go | AppID      | AppKey        | /          |
+| 阿里云盘 | 跳转登录 | alicloud | alicloud_go | APP ID     | App Secret    | /          |
+| 阿里云盘 | 直接登录 | alicloud | alicloud_cs | /      | /    | /          |
+| 百度云盘 | 验证登录 | baiduyun | baiduyun_go | /      | AppKey        | SecretKey  |
+| 百度云盘 | 手动登录 | baiduyun | baiduyun_ob | /      | AppKey        | SecretKey  |
+| 115 云盘 | 跳转登录 | 115cloud | 115cloud_go | AppID      | AppSecret     | /          |
+| 123 云盘 | 跳转登录 | 123cloud | 123cloud_go | client_id  | client_secret | /          |
+| 谷歌云盘 | 跳转登录 | googleui | googleui_go | 客户端ID   | 客户端秘钥    | /          |
+| Yandex   | 跳转登录 | yandexui | yandexui_go | AppID      | AppKey        | /          |
+| DropBox   | 跳转登录 | yandexui | dropboxs_go | AppID      | AppKey        | /          |
 
 
 
@@ -134,15 +139,16 @@ cp wrangler.jsonc.example wrangler.jsonc
     "onedrive_key": "*****************************",
     "alicloud_uid": "*****************************",
     "alicloud_key": "*****************************",
-    "baiduyun_uid": "*****************************",
     "baiduyun_key": "*****************************",
     "baiduyun_ext": "*****************************",
-    "115cloud_uid": "*****************************",
-    "115cloud_key": "*****************************",
+    "cloud115_uid": "*****************************",
+    "cloud115_key": "*****************************",
     "googleui_uid": "*****************************",
     "googleui_key": "*****************************",
     "yandexui_uid": "*****************************",
-    "yandexui_key": "*****************************"
+    "yandexui_key": "*****************************",
+    "dropboxs_uid": "*****************************",
+    "dropboxs_key": "*****************************"
   },
 ```
 
