@@ -74,8 +74,8 @@ export async function alyToken(c: Context) {
     if (!clients_info.drivers) return c.json({text: 'No Cookies',}, 401);
     if (!oauth_type) oauth_type = "authorization_code";
     const req: AliAccessTokenReq = {
-        client_id: clients_info.servers  ? c.env.alicloud_uid : <string>c.req.query('client_id'),
-        client_secret: clients_info.servers ? c.env.alicloud_key : <string>c.req.query('client_secret'),
+        client_id: clients_info.servers  ? c.env.alicloud_uid : <string>c.req.query('client_id') || clients_info.app_uid,
+        client_secret: clients_info.servers ? c.env.alicloud_key : <string>c.req.query('client_secret') || clients_info.app_key,
         grant_type: <string>oauth_type,
         code: <string>c.req.query('code'),
         refresh_token: <string>c.req.query('refresh_token')
