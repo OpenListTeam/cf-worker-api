@@ -120,11 +120,24 @@
         </div>
     </div>
 </div>
+
+<!-- Google Privacy Consent Modal -->
+<div id="google-consent-modal" class="modal">
+   <div class="google-consent-modal-content">
+       <h4>隐私政策和使用条款</h4>
+       <p>根据 Google 要求，请阅读并同意 OpenList 的隐私政策和使用条款。</p>
+       <p><a href="https://docs.oplist.org/privacy" target="_blank">OpenList 隐私政策</a></p>
+       <p><a href="https://docs.oplist.org/terms" target="_blank">OpenList 使用条款</a></p>
+       <button class="btn btn-primary" onclick="acceptGoogleConsent()">同意</button>
+   </div>
+</div>
+
 <script src="/static/event.js"></script>
 <script src="/static/login.js"></script>
 <script src="/static/token.js"></script>
 <script src="/static/theme.js"></script>
 <script src="/static/aliv2.js"></script>
+<script src="/static/googleconsent.js"></script>
 <script src="/static/spoid.js"></script>
 <script src="/static/input.js"></script>
 <script>

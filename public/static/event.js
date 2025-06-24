@@ -92,4 +92,8 @@ function onSelect() {
         server_use_input.checked = false;
         server_use_input.disabled = true;
     }
+    // Google弹出隐私政策和使用条款
+    if (driver_txt_input.value === "googleui_go") {
+        showGoogleConsent();
+    }
 }
