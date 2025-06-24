@@ -1,8 +1,6 @@
 import {Context, Hono} from 'hono'
-import {KVNamespace} from '@cloudflare/workers-types';
 import {serveStatic} from 'hono/cloudflare-workers' // @ts-ignore
 import manifest from '__STATIC_CONTENT_MANIFEST'
-import * as local from "hono/cookie";
 import * as oneui from './driver/onedrive_oa';
 import * as aliui from './driver/alicloud_oa';
 import * as aliui2 from './driver/alicloud_cs';
@@ -12,7 +10,6 @@ import * as baidu from './driver/baiduyun_oa';
 import * as goapi from './driver/googleui_oa';
 import * as yandex from './driver/yandexui_oa';
 import * as drops from './driver/dropboxs_oa';
-import {genToken} from "./driver/baiduyun_oa";
 
 export type Bindings = {
     MAIN_URLS: string, baiduyun_ext: string,
